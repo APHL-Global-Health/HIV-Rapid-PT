@@ -50,11 +50,11 @@ class WelcomeNote extends Notification
     {
         return (new MailMessage)
             ->subject('PT Participation Confirmation')
-            ->line('Your request to participate in the Rapid HIV Proficiency Testing has been approved. Click on the button below to get started.')
             ->greeting('Hello '.$this->user->name)
+            ->line('Your request to participate in the Rapid HIV Proficiency Testing has been approved. Click on the button below to get started.')
             ->action('Get Started', url('password/reset', $this->user->token))
-            ->line('Your tester ID/username is '.$this->user->username)
-            ->line('In case of any challenges, please contact your County Coordinator.')
+            ->line('Your Tester Enrollment ID is '.$this->user->username)
+            ->line('In case of any challenges, please contact your County Health/Lab Coordinator.')
             ->line('Thank you for using our application!');
     }
 

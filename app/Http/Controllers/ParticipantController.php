@@ -906,6 +906,7 @@ class ParticipantController extends Controller
     public function denyUserVerification(Request $request){
         $id = $request->id;
         $user = User::withTrashed()->find($id); 
+        $user->delete();
         $user->notify(new RegretNote($user));        
     }
 }

@@ -138,6 +138,12 @@ $style = [
                                             </p>
                                         @endforeach
 
+                                        <!-- Contact NPHL Help Desk-->
+                                        <p style="{{ $style['paragraph'] }}">
+                                            For further assistance,  contact the
+                                            <a href = "http://www.nphls.or.ke/helpdesk/">NPHL Help Desk</a>
+                                        </p>
+
                                         <!-- Salutation -->
                                         <p style="{{ $style['paragraph'] }}">
                                             Regards,<br>{{ config('app.name') }}

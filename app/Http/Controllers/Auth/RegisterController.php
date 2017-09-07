@@ -187,18 +187,11 @@ class RegisterController extends Controller
         try
         {
             //  Do Email verification for email address
-            $user->email_verification_code = Str::random(60);
+            $user->email_verification_code = Str::random(60); 
             $user->save();
-            /*$usr = $user->toArray();
-
-            Mail::send('auth.verification', $usr, function($message) use ($usr) {
-                $message->to($usr['email']);
-                $message->subject('National HIV PT - Email Verification Code');
-            });*/
-
+            
             event(new Registered($usr = $user));
 
-            //$this->guard()->login($user);
         }
         catch(Exception $e)
         {

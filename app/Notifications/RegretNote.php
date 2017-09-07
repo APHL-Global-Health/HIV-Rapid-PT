@@ -51,8 +51,8 @@ class RegretNote extends Notification
         return (new MailMessage)
             ->subject('PT Participation Request')
             ->greeting('Hello '.$this->user->name)
-            ->line('Your request to participate in the Rapid HIV Proficiency Testing has not been approved.')
-            ->line('Kindly contact your County Coordinator for further assistance.')
+            ->line('Your request to participate in the Rapid HIV Proficiency Testing was not successfu.')
+            ->line('Kindly contact your County Health/Lab Coordinator for further assistance.')
             ->line('Thank you for using our application!');
     }
 
