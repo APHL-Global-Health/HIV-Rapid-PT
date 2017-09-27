@@ -6,6 +6,7 @@ Vue.http.interceptors.unshift(function(request, next) {
         }
     });
 });
+Vue.http.options.emulateJSON = true;
 new Vue({
 
     el: '#manage-result',
@@ -36,7 +37,8 @@ new Vue({
         query: '',
         other: '',
         dt: [],
-        toggle: {}
+        toggle: {},
+        analysisResult: []
     },
 
     computed: {

@@ -88,7 +88,29 @@ class ResultController extends Controller
      */
     public function store(Request $request)
     {
-                return response()->json('Saved.');
+        $roundId = $request->round_id;
+        //  date/text/radio fields are arrays but need to check if the fields are in request
+        if($request->has('date'))
+            dd($request->date);
+        foreach($request->date as $key => $value)
+        {
+            //  save all values regardless of the order
+        }
+        foreach($request->radio as $key => $value)
+        {
+            //  save all values regardless of the order
+        }
+        foreach($request->text as $key => $value)
+        {
+            //  save all values regardless of the order
+        }
+        foreach($request->area as $key => $value)
+        {
+            //  save all values regardless of the order
+        }
+            dd($key);
+        dd($request->date);
+        dd($roundId);
         // Check if round has been selected
         // if ($request->get('round_id') =="") {
         //     return response()->json(['1']);            

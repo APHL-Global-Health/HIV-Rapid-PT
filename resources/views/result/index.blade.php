@@ -132,44 +132,38 @@
                                                 <div v-if="item.tag == 1">
                                                     <div class="form-checkbox checkbox-inline" v-for="option in item.options">
                                                         <label class="form-checkbox-label">
-                                                            <input type="checkbox" :value="option.id" :name="'field_'+item.id">
+                                                            <input type="checkbox" :value="option.id" :name="'check['+item.id+']'">
                                                             @{{ option.title }}
                                                         </label>
                                                     </div>
                                                 </div>
                                                 <div v-if="item.tag == 2">
-                                                    <input type="date" :name="'field_'+item.id" class="form-control"/>
+                                                    <input type="date" :name="'date['+item.id+']'" class="form-control"/>
                                                 </div>
                                                 <div v-if="item.tag == 3">
-                                                    <input type="email" :name="'field_'+item.id" class="form-control" />
+                                                    <input type="email" :name="'email['+item.id+']'" class="form-control" />
                                                 </div>
                                                 <div v-if="item.tag == 4">
-                                                    <input type="text" :name="'field_'+item.id" class="form-control" />
+                                                    <input type="text" :name="'text['+item.id+']'" class="form-control" />
                                                 </div>
                                                 <div v-if="item.tag == 5">
                                                     <div class="form-radio radio-inline" v-for="option in item.options">
                                                         <label class="form-radio-label">
-                                                            <input type="radio" :value="option.id" :name="'field_'+item.id" />
+                                                            <input type="radio" :value="option.id" :name="'radio['+item.id+']'" />
                                                             @{{ option.title }}
                                                         </label>
                                                     </div>
                                                     <!-- <input type="text" :name="'comment_'+item.id" class="form-control" /> -->
                                                 </div>
                                                 <div v-if="item.tag == 6">
-                                                    <select class="form-control c-select" :name="'field_'+item.id">
+                                                    <select class="form-control c-select" :name="'select['+item.id+']'">
                                                         <option selected></option>
                                                         <option v-for="option in item.options" :value="option.id">@{{ round.title }}</option>   
                                                     </select>
                                                 </div>
                                                 <div v-if="item.tag == 7">
-                                                    <textarea :name="'field_'+item.id" class="form-control"></textarea>
+                                                    <textarea :name="'area['+item.id+']'" class="form-control"></textarea>
                                                 </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row" :class="'toggle_'+item.id" style="display:none;">
-                                            <label class="col-sm-5 form-control-label text-danger font-weight-bold" for="title">Please Specify:</label>
-                                            <div class="col-sm-7">
-                                                <textarea :name="'field_'+item.id" class="form-control"></textarea>
                                             </div>
                                         </div>
                                     </div>
