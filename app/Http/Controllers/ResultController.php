@@ -89,28 +89,64 @@ class ResultController extends Controller
     public function store(Request $request)
     {
         $roundId = $request->round_id;
+        $userId = auth()->user()->id;
+        $enrolment = Enrol::where('round_id', $roundId)->where('user_id', $userId)->first();
+        $pt = new Pt;
+        $pt->enrolment_id = $enrolment->id;
+        $pt->panel_status = Pt::NOT_CHECKED;
+        $pt->save();
         //  date/text/radio fields are arrays but need to check if the fields are in request
         if($request->has('date'))
-            dd($request->date);
-        foreach($request->date as $key => $value)
         {
-            //  save all values regardless of the order
+            foreach($request->date as $key => $value)
+            {
+                //  save all values regardless of the order
+                $result = new Result;
+                $result->pt_id = $pt->id;
+                $result->field_id = $key;
+                $result->response = $value;
+                $result->save();
+            }
         }
-        foreach($request->radio as $key => $value)
+        if($request->has('radio'))
         {
-            //  save all values regardless of the order
+            foreach($request->radio as $key => $value)
+            {
+                //  save all values regardless of the order
+                $result = new Result;
+                $result->pt_id = $pt->id;
+                $result->field_id = $key;
+                $result->response = $value;
+                $result->save();
+            }
         }
-        foreach($request->text as $key => $value)
+        if($request->has('text'))
         {
-            //  save all values regardless of the order
+            foreach($request->text as $key => $value)
+            {
+                //  save all values regardless of the order
+                $result = new Result;
+                $result->pt_id = $pt->id;
+                $result->field_id = $key;
+                $result->response = $value;
+                $result->save();
+            }
         }
-        foreach($request->area as $key => $value)
+        if($request->has('area'))
         {
-            //  save all values regardless of the order
+            foreach($request->area as $key => $value)
+            {
+                //  save all values regardless of the order
+                $result = new Result;
+                $result->pt_id = $pt->id;
+                $result->field_id = $key;
+                $result->response = $value;
+                $result->save();
+            }
         }
-            dd($key);
-        dd($request->date);
-        dd($roundId);
+        //  update enrollment status to 1 to signify submitted results
+        $enrolment->status = Enrol::DONE;        
+        $enrolment->save();
         // Check if round has been selected
         // if ($request->get('round_id') =="") {
         //     return response()->json(['1']);            
@@ -299,6 +335,7 @@ class ResultController extends Controller
      */
     public function update(Request $request, $id)
     {
+        //dd($id);
         /*$this->validate($request, [
             'round_id' => 'required',
             'date_prepared' => 'required',
@@ -309,6 +346,7 @@ class ResultController extends Controller
             'panels_shipped' => 'required',
         ]);*/
         $pt = Pt::find($id);
+        dd($request->all());
     
         //  Proceed to form-fields
         foreach ($request->all() as $key => $value)

@@ -23,8 +23,6 @@ new Vue({
         offset: 4,
         formErrors:{},
         formErrorsUpdate:{},
-        analysisResult : {'round_id':'','field_id[]':'','response[]':'','comment[]':''},
-        fillResult : {'round_id':'','field_id[]':'','response[]':'','comment[]':'','id':''},
         fillVerifiedResult: {},
         form: [],
         sets: [],
@@ -134,20 +132,17 @@ new Vue({
             $("#view-result").modal('show');
         },
 
-        updateResult: function(id, scope){
-            this.$validator.validateAll(scope).then(() => {
-                var input = this.fillResult;
-                this.$http.put('/vueresults/'+id,input).then((response) => {
-                    this.changePage(this.pagination.current_page);
-                    this.fillResult = {'name':'','display_name':'','description':'','id':''};
-                    $("#edit-result").modal('hide');
-                    toastr.success('Result Updated Successfully.', 'Success Alert', {timeOut: 5000});
-                }, (response) => {
-                    this.formErrorsUpdate = response.data;
-                });
-            }).catch(() => {
-                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000});
-                return false;
+        updateResult: function(){
+            let dataForm = document.getElementById('update_analysis_results');
+            let updateData = new FormData(dataForm);
+            let id = $('#update_pt_id').val();
+            console.log(updateData);
+            this.$http.put('/vueresults/'+id, updateData).then((response) => {
+                this.changePage(this.pagination.current_page);
+                $("#edit-result").modal('hide');
+                toastr.success('Result Updated Successfully.', 'Success Alert', {timeOut: 5000});
+            }, (response) => {
+                this.formErrorsUpdate = response.data;
             });
         },
 

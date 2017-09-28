@@ -63,11 +63,11 @@
             </td>
             <td>
             @permission('view-result')
-                <button class="btn btn-sm btn-secondary" @click.prevent="viewResult(result)" disabled><i class="fa fa-reorder"></i> View</button>	
+                <button class="btn btn-sm btn-secondary" @click.prevent="viewResult(result)"><i class="fa fa-reorder"></i> View</button>	
             @endpermission
-            @permission('update-result')
-                <button  v-if="result.panel_status!=3" class="btn btn-sm btn-primary" @click.prevent="editResult(result)" disabled><i class="fa fa-edit"></i> Edit</button>
-            @endpermission
+            
+                <button  v-if="result.panel_status!=3" class="btn btn-sm btn-primary" @click.prevent="editResult(result)"><i class="fa fa-edit"></i> Edit</button>
+            
             @permission('delete-result')
                 <button class="btn btn-sm btn-danger" @click.prevent="deleteResult(result)"><i class="fa fa-power-off"></i> Disable</button>
             @endpermission            
@@ -190,13 +190,12 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <form method="POST" enctype="multipart/form-data" v-on:submit.prevent="updateResult('update_results')" id="update_test_results" data-vv-validate="update_results">
-                            <input type="text" name="id" :value="frmData.pt">
+                        <form method="POST" enctype="multipart/form-data" v-on:submit.prevent="updateResult" id="update_analysis_results">
                             <div class="col-md-12">
                                 <div class="form-group row">
                                     <label class="col-sm-5 form-control-label" for="title">PT Round:</label>
                                     <div class="col-sm-7">
-                                        <select class="form-control c-select" name="round_id">
+                                        <select class="form-control c-select" name="pt_round">
                                             <option selected></option>
                                             <option v-for="round in rounds" v-if="frmData.round" v-bind="{ 'selected': round.id==frmData.round.id}" :value="round.id">@{{ round.value }}</option>   
                                         </select>
@@ -205,46 +204,47 @@
                                 <div v-for="frm in form">
                                     <p class="text-primary">@{{ frm.title }}</p>
                                     <hr>
+                                    <input type="text" name="mahako" class="form-control" value="Nakuhenza" />
                                     <div v-for="item in frm.fields">
                                         <div v-if="frmData" v-for="dt in frmData.results">
+                                            <input type="hidden" class="form-control" name="update_pt_id" id="update_pt_id" :value="frmData.pt.id"/>
                                             <div class="form-group row" v-if="dt.field_id==item.id">
                                                 <label class="col-sm-5 form-control-label" for="title">@{{ item.title }}:</label>
                                                 <div class="col-sm-7">
                                                     <div v-if="item.tag == 1">
                                                         <div class="form-checkbox form-checkbox-inline" v-for="option in item.options">
                                                             <label class="form-checkbox-label">
-                                                                <input type="checkbox" :value="option.id" :name="'field_'+item.id">
+                                                                <input type="checkbox" :value="option.id" :name="'checks['+item.id+']'">
                                                                 @{{ option.title }}
                                                             </label>
                                                         </div>
                                                     </div>
                                                     <div v-if="item.tag == 2">
-                                                        <input type="date" :name="'field_'+item.id" class="form-control" :value="dt.response" />
+                                                        <input type="date" :name="'dates['+item.id+']'" class="form-control" :value="dt.response" />
                                                     </div>
                                                     <div v-if="item.tag == 3">
-                                                        <input type="email" :name="'field_'+item.id" class="form-control" :value="dt.response" />
+                                                        <input type="email" :name="'emails['+item.id+']'" class="form-control" :value="dt.response" />
                                                     </div>
                                                     <div v-if="item.tag == 4">
-                                                        <input type="text" :name="'field_'+item.id" class="form-control" :value="dt.response" />
+                                                        <input type="text" :name="'texts['+item.id+']'" class="form-control" :value="dt.response" />
                                                     </div>
                                                     <div v-if="item.tag == 5">
 
                                                         <div class="form-radio radio-inline" v-for="option in item.options">
                                                             <label class="form-radio-label">
-                                                                <input type="radio" :value="option.id" :name="'field_'+item.id" v-bind="{ 'checked': option.id==dt.response}"/>
+                                                                <input type="radio" :value="option.id" :name="'radios['+item.id+']'" v-bind="{ 'checked': option.id==dt.response}"/>
                                                                 @{{ option.title }}
                                                             </label>
                                                         </div>
-                                                        <input v-if="dt.response==4" type="text" :name="'comment_'+item.id" class="form-control" :value="dt.comment" />
                                                     </div>
                                                     <div v-if="item.tag == 6">
-                                                        <select class="form-control c-select" :name="'field_'+item.id">
+                                                        <select class="form-control c-select" :name="'selects['+item.id+']'">
                                                             <option selected></option>
                                                             <option v-for="option in item.options" v-bind="{ 'selected': option.id==dt.response}" :value="option.id">@{{ round.title }}</option>   
                                                         </select>
                                                     </div>
                                                     <div v-if="item.tag == 7">
-                                                        <textarea v-if="dt.field_id==item.id" :name="'field_'+item.id" class="form-control">@{{dt.response}}</textarea>
+                                                        <textarea v-if="dt.field_id==item.id" :name="'areas['+item.id+']'" class="form-control">@{{dt.response}}</textarea>
                                                     </div>
                                                 </div>
                                             </div>
