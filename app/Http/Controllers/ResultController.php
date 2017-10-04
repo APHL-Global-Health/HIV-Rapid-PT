@@ -335,16 +335,6 @@ class ResultController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //dd($id);
-        /*$this->validate($request, [
-            'round_id' => 'required',
-            'date_prepared' => 'required',
-            'date_shipped' => 'required',
-            'shipping_method' => 'required',
-            'shipper_id' => 'required',
-            'facility_id' => 'required',
-            'panels_shipped' => 'required',
-        ]);*/
         $pt = Pt::find($id);
         dd($request->all());
     

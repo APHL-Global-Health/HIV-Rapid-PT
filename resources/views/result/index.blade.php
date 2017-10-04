@@ -204,7 +204,6 @@
                                 <div v-for="frm in form">
                                     <p class="text-primary">@{{ frm.title }}</p>
                                     <hr>
-                                    <input type="text" name="mahako" class="form-control" value="Nakuhenza" />
                                     <div v-for="item in frm.fields">
                                         <div v-if="frmData" v-for="dt in frmData.results">
                                             <input type="hidden" class="form-control" name="update_pt_id" id="update_pt_id" :value="frmData.pt.id"/>

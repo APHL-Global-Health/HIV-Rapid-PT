@@ -504,3 +504,7 @@ Route::get("/new_participants/{id}/{}", array(
     "as"   => "new.participants",
     "uses" => "RoundController@testerSummary"
 ));
+Route::post("/results/{id}", array(
+    "as"   => "results.update",
+    "uses" => "ResultController@update"
+));

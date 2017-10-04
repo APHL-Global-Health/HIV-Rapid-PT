@@ -137,7 +137,7 @@ new Vue({
             let updateData = new FormData(dataForm);
             let id = $('#update_pt_id').val();
             console.log(updateData);
-            this.$http.put('/vueresults/'+id, updateData).then((response) => {
+            this.$http.post('/results/'+id, updateData).then((response) => {
                 this.changePage(this.pagination.current_page);
                 $("#edit-result").modal('hide');
                 toastr.success('Result Updated Successfully.', 'Success Alert', {timeOut: 5000});
