@@ -9,26 +9,32 @@
 
 ## Setup Guide
 
-- Maria DB / MySQL
+1. Maria DB / MySQL
   - Create a new blank database
   - Create a database user with full permissions over the database
-- Clone this repository (*where HIV_RAPID_PT_HOME represents the folder you are cloning to).
-  `git clone git@github.com:APHL-Global-Health/HIV-Rapid-PT.git HIV_RAPID_PT_HOME`
-- Install Laravel and other PHP dependencies
+2. Clone this repository (*where HIV_RAPID_PT_HOME represents the folder you are cloning to*).
+  ```
+  git clone git@github.com:APHL-Global-Health/HIV-Rapid-PT.git HIV_RAPID_PT_HOME
+  ```
+3. Install Laravel and other PHP dependencies
   ```
    cd HIV_RAPID_PT_HOME
    composer install
   ```
-- Create a configuration file (.env) and update the relevant details
+4. Create a configuration file (.env) and update the relevant details
   ```
    cd HIV_RAPID_PT_HOME
    cp .env.example .env
   ```
   - make the requisite changes to this file such as the database name and access credentials
   - create the application key
-    `php artisan key:generate`
+    ```
+    php artisan key:generate
+    ```
   - create and seed the database
-    `php artisan migrate --seed`
+    ```
+    php artisan migrate --seed
+    ```
   - Point your web server to the `HIV_RAPID_PT_HOME/public' folder.
     - Ensure that the webserver user has write permissions to the `HIV_RAPID_PT_HOME/storage` folder.
 
