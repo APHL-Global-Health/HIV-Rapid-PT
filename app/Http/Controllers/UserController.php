@@ -211,7 +211,7 @@ class UserController extends Controller
             $user->detachAllRoles();
             $ru = DB::table('role_user')->insert(["user_id" => $id, "role_id" => $role, "tier" => $tier, "program_id" => $program_id]);
         }
-        if($user)
+        if(isset($user))
         {
             //  send email and sms
             $token = app('auth.password.broker')->createToken($user);
