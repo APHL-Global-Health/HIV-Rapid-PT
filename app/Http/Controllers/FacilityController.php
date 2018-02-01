@@ -183,7 +183,7 @@ class FacilityController extends Controller
      */
     public function counties()
     {
-        $counties = County::pluck('name', 'id');
+        $counties = County::orderBy('name')->pluck('name', 'id');
         $categories = [];
         foreach($counties as $key => $value)
         {
@@ -211,7 +211,7 @@ class FacilityController extends Controller
      */
     public function facilities($id)
     {
-        $facilities = SubCounty::find($id)->facilities->pluck('name', 'id');
+        $facilities = SubCounty::find($id)->facilities->orderBy('name')->pluck('name', 'id');
         $categories = [];
         foreach($facilities as $key => $value)
         {

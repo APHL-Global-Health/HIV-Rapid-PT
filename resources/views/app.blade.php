@@ -27,14 +27,10 @@
 
         <!-- Toastr Styling -->
         <link href="{{ asset('css/toastr.min.css') }}" rel="stylesheet">
-        <style type="text/css">
-        /* CSS used here will be applied after bootstrap.css */
-            .picha {
-                background-color: white;
-            }
-        </style>
         <!-- Sweet Alert Styling-->
         <link rel="stylesheet" type="text/css" href="{{ asset('css/sweetalert.css') }}">
+
+        <link rel="stylesheet" type="text/css" href="{{ asset('css/hivr.css') }}">
     </head>
     <body>
         <!-- Preloader -->

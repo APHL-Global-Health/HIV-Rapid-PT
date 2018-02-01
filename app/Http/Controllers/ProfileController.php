@@ -27,7 +27,7 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
         $user->sex = $user->maleOrFemale($user->gender);
-        $user->rl = $user->ru()->role_id;
+        $user->rl = $user->ru()!==null?$user->ru()->role_id:"";
         $user->participant = Role::idByName("Participant");
         $user->image?$user->image=$user->image:$user->image='default.png';
         if($user->rl == $user->participant)

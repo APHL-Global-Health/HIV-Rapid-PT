@@ -19,14 +19,15 @@
 3. Install Laravel and other PHP dependencies
   ```
    cd HIV_RAPID_PT_HOME
-   composer install
+   composer dumpautoload
+   composer update
   ```
 4. Create a configuration file (.env) and update the relevant details
   ```
    cd HIV_RAPID_PT_HOME
    cp .env.example .env
   ```
-  - make the requisite changes to this file such as the database name and access credentials
+  - make the requisite changes to this file such as database and email details: host, port, name, access credentials
   - create the application key
     ```
     php artisan key:generate
@@ -36,7 +37,9 @@
     php artisan migrate --seed
     ```
   - Point your web server to the `HIV_RAPID_PT_HOME/public' folder.
-    - Ensure that the webserver user has write permissions to the `HIV_RAPID_PT_HOME/storage` folder.
+    - Ensure that the webserver user has write permissions to:
+      - `HIV_RAPID_PT_HOME/storage`s
+      - `HIV_RAPID_PT_HOME/bootstrap/cache`
 
 ## Contributing
 

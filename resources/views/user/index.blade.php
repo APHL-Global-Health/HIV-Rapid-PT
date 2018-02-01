@@ -22,10 +22,6 @@
                         {!! trans('messages.add') !!}
                     </button>
                 @endpermission
-                    <a class="btn btn-sm btn-carrot" href="#" onclick="window.history.back();return false;" alt="{!! trans('messages.back') !!}" title="{!! trans('messages.back') !!}">
-                        <i class="fa fa-step-backward"></i>
-                        {!! trans('messages.back') !!}
-                    </a>
                 </h5>
             </div>
             <div class="col-md-3">
@@ -39,7 +35,6 @@
             </div>
         </div>
     </div>
-
     <table class="table table-bordered">
         <tr>
             <th>Name</th>
@@ -62,13 +57,14 @@
             </td>
             <td>
             @permission('update-user')    
-                <button v-bind="{ 'disabled': user.deleted_at }" class="btn btn-sm btn-primary"  @click.prevent="editUser(user)"><i class="fa fa-edit"></i> Edit</button>
+                <button v-bind="{ 'disabled': user.deleted_at }" class="btn btn-sm btn-primary" @click.prevent="editUser(user)"><i class="fa fa-edit"></i> Edit</button>
             @endpermission
             @permission('restore-user') 
                 <button v-if="user.deleted_at" class="btn btn-sm btn-success" @click.prevent="restoreUser(user)"><i class="fa fa-toggle-on"></i> Enable</button>
             @endpermission
             @permission('delete-user') 
-                <button v-if="!user.deleted_at" class="btn btn-sm btn-alizarin" @click.prevent="deleteUser(user)"><i class="fa fa-power-off"></i> Disable</button>
+                <button v-if="!user.deleted_at" class="btn btn-sm btn-alizarin" @click.prevent="deleteUser(user)">
+                    <i class="fa fa-power-off"></i> Disable</button>
             @endpermission
             @permission('transfer-user') 
                 <button style="display: none;" v-if="user.uid" class="btn btn-sm btn-wet-asphalt"  @click.prevent="populateUser(user)"><i class="fa fa-send"></i> Transfer</button>
@@ -109,13 +105,19 @@
                     <h4 class="modal-title" id="myModalLabel">Create User</h4>
                 </div>
                 <div class="modal-body">
+                    <div class="loading-container" v-if=loading>
+                        <div class="loading">
+                            <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
                     <div class="row">
                         <form method="POST" enctype="multipart/form-data" v-on:submit.prevent="createUser('create_user')" data-vv-scope="create_user">
                             <div class="col-md-12">
                                 <div class="form-group row">
                                     <label class="col-sm-4 form-control-label"  :class="{'help is-danger': errors.has('create_user.name') }" for="name">Name:</label>
                                     <div class="col-sm-8" :class="{ 'control': true }">
-                                        <input v-validate="'required|alpha_spaces'" class="form-control" :class="{'input': true, 'is-danger': errors.has('create_user.name') }" name="name" type="text" placeholder="" v-model="newUser.name" />
+                                        <input v-validate="'required'" class="form-control" :class="{'input': true, 'is-danger': errors.has('create_user.name') }" name="name" type="text" placeholder="" v-model="newUser.name" />
                                         <span v-show="errors.has('create_user.name')" class="help is-danger">@{{ errors.first('create_user.name') }}</span>
                                     </div>
                                 </div>
@@ -237,13 +239,19 @@
 	                <h4 class="modal-title" id="myModalLabel">Edit User</h4>
                 </div>
                 <div class="modal-body">
+                    <div class="loading-container" v-if=loading>
+                        <div class="loading">
+                            <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
                     <div class="row">
                         <form method="POST" enctype="multipart/form-data" v-on:submit.prevent="updateUser(fillUser.id, 'update_user')" data-vv-validate="update_user">
                             <div class="col-md-12">
                                 <div class="form-group row">
                                     <label class="col-sm-4 form-control-label"  :class="{'help is-danger': errors.has('name') }" for="name">Name:</label>
                                     <div class="col-sm-8" :class="{ 'control': true }">
-                                        <input v-validate="'required|alpha_spaces'" class="form-control" :class="{'input': true, 'is-danger': errors.has('name') }" name="name" type="text" placeholder="" v-model="fillUser.name" />
+                                        <input v-validate="'required'" class="form-control" :class="{'input': true, 'is-danger': errors.has('name') }" name="name" type="text" placeholder="" v-model="fillUser.name" />
                                         <span v-show="errors.has('name')" class="help is-danger">@{{ errors.first('name') }}</span>
                                     </div>
                                 </div>
@@ -364,6 +372,12 @@
                 <h4 class="modal-title" id="myModalLabel">Upload Worksheet</h4>
                 </div>
                 <div class="modal-body">
+                    <div class="loading-container" v-if=loading>
+                        <div class="loading">
+                            <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
                     <div class="row">
                         <form method="POST" enctype="multipart/form-data" v-on:submit.prevent="batchReg">
                             <div class="col-md-12">
@@ -394,6 +408,12 @@
                 <h4 class="modal-title" id="myModalLabel">Upload Worksheet</h4>
                 </div>
                 <div class="modal-body">
+                    <div class="loading-container" v-if=loading>
+                        <div class="loading">
+                            <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
                     <div class="row">
                         <form method="POST" enctype="multipart/form-data" v-on:submit.prevent="importUsers('import_users')" data-vv-validate="import_users">
                             <div class="col-md-12">

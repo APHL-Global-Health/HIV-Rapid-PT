@@ -49,7 +49,7 @@ new Vue({
                 this.changePage(this.pagination.current_page);
                 this.fillSettings = {'code':'','username':'','api_key':''};
                 $("#edit-settings").modal('hide');
-                toastr.success('Bulk SMS Settings Updated Successfully.', 'Success Alert', {timeOut: 5000});
+                toastr.success('Bulk SMS Settings Updated Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
             }, (response) => {
                 this.formErrorsUpdate = response.data;
             });
@@ -99,7 +99,7 @@ new Vue({
                 this.userProfile = {'name':'', 'sex':'', 'email':'', 'phone':'', 'address':'', 'username':'', 'image':'', 'uid':''},
                 $("#edit-profile").modal('hide');
                 this.getVueProfile();
-                toastr.success('User Profile Updated Successfully.', 'Success Alert', {timeOut: 5000});
+                toastr.success('User Profile Updated Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
             }, (response) => {
                 this.formErrors = response.data;
             });
@@ -113,24 +113,24 @@ new Vue({
                     if(response.data.error)
                     {
                         swal("Alert!", response.data.error, "error");
-                        // toastr.warning(this.warning, 'Notification', {timeOut: 5000});
+                        // toastr.warning(this.warning, 'Notification', {timeOut: 5000, positionClass: "toast-top-full-width"});
                     }
                     else
                     {
                         this.userPassword = {'old':'', 'new':'', 'confirm':''},
                         $("#update-password").modal('hide');
                         this.getVueProfile();
-                        toastr.success('Password Updated Successfully.', 'Success Alert', {timeOut: 5000});
+                        toastr.success('Password Updated Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
                     }
                 }, (response) => {
                     if(response.data.error)
                     {
                         swal("Alert!", response.data.error, "error");
-                        // toastr.warning(this.warning, 'Notification', {timeOut: 5000});
+                        // toastr.warning(this.warning, 'Notification', {timeOut: 5000, positionClass: "toast-top-full-width"});
                     }
                 });
             }).catch(() => {
-                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000});
+                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000, positionClass: "toast-top-full-width"});
             });
         },
 
@@ -146,16 +146,16 @@ new Vue({
                     this.transUser = {'designation':'', 'program':'', 'mfl_code':''},
                     $("#transfer-participant").modal('hide');
                     this.getVueProfile();
-                    toastr.success('Participant Transferred Successfully.', 'Success Alert', {timeOut: 5000});
+                    toastr.success('Participant Transferred Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
                 }, (response) => {
                     if(response.data.error)
                     {
                         swal("Alert!", response.data.error, "error");
-                        // toastr.warning(this.warning, 'Notification', {timeOut: 5000});
+                        // toastr.warning(this.warning, 'Notification', {timeOut: 5000, positionClass: "toast-top-full-width"});
                     }
                 });
             }).catch(() => {
-                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000});
+                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000, positionClass: "toast-top-full-width"});
             });
         },
     }

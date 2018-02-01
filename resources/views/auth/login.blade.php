@@ -77,7 +77,7 @@
                 @endif     
                 <div class="form-group">
                     <label :class="{'help is-danger': errors.has('username') }" for="username/TesterID"><h6>Username or PT Enrollment ID</h6></label>
-                    <input type="text" v-validate="'required'" class="form-control" :class="{'input': true, 'is-danger': errors.has('username') }"  name="username" placeholder="eg. me@mymail.com or 11695" data-toggle="tooltip" title="Enter Username or PT Enrollment ID" data-placement="top" data-trigger="hover" autofocus="">
+                    <input type="text" v-validate="'required'" class="form-control" :class="{'input': true, 'is-danger': errors.has('username') }"  name="username" placeholder="eg. myusername or 11695" data-toggle="tooltip" title="Enter Username or PT Enrollment ID" data-placement="top" data-trigger="hover" autofocus="">
                     <span v-show="errors.has('username')" class="help is-danger">@{{ errors.first('username') }}</span>
                 </div>
                 <div class="form-group">

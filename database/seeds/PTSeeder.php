@@ -30,8 +30,8 @@ class PTSeeder extends DatabaseSeeder
                 "name" => "PT Administrator", "gender" => "1", "phone"=>"0722000000", "address" => "P.O. Box 59857-00200, Nairobi", "created_at" => $now, "updated_at" => $now
             ),
             array(
-                "username" => "kitsao", "password" => Hash::make("password"), "email" => "kitsao@gmail.com",
-                "name" => "Kitsao", "gender" => "1", "phone"=>"0764999662", "address" => "Nairobi", "created_at" => $now, "updated_at" => $now
+                "username" => "jbundi", "password" => Hash::make("password"), "email" => "jeffbundi@gmail.com",
+                "name" => "Jeff Bundi", "gender" => "0", "phone"=>"0721825737", "address" => "Nairobi", "created_at" => $now, "updated_at" => $now
             )
         );
         foreach ($usersData as $user)

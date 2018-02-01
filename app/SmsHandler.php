@@ -17,15 +17,21 @@ class SmsHandler{
     */
     protected $username;
 
+    /*
+    * @var source
+    */
+    protected $source;
+
 
     /**
      * Constructor for smshandler
      *
      * @param api key     $apiKey
      * @param username      $username
+     * @param source      $source
      * @return $gateway object for sending sms
      */
-    public function __construct($username = null, $apiKey = null)
+    public function __construct($username = null, $apiKey = null, $source = null)
     {
         if($username == null && $apiKey == null) {
             $settings = DB::table('bulk_sms_settings')->first();
@@ -35,11 +41,15 @@ class SmsHandler{
             if($apiKey == null ) {
                 $this->apiKey = $settings->api_key;
             }
+            if($source == null ) {
+                $this->source = $settings->code;
+            }
         //sms settings
         }
         else {
             $this->username   = $username;
-            $this->apiKey     = $api_key;
+            $this->apiKey     = $apiKey;
+            $this->source     = $source;
         }
     }
 
@@ -49,7 +59,7 @@ class SmsHandler{
             $phone = ltrim($phone, '0');
             $recepient = "+254".$phone;
             $gateway = new Gateway($this->username, $this->apiKey);
-            $result = $gateway->sendMessage($recepient, $message);
+            $result = $gateway->sendMessage($recepient, $message, $this->source);
         }
     }
 }

@@ -87,16 +87,23 @@ new Vue({
         createUser: function(scope){
             this.$validator.validateAll(scope).then(() => {
                 var input = this.newUser;
+                this.loading = true;
                 this.$http.post('/vueusers',input).then((response) => {
                     this.changePage(this.pagination.current_page);
                     this.newUser = {'name':'', 'username': '','gender':'', 'phone':'', 'email':'', 'address':''};
                     $("#create-user").modal('hide');
-                    toastr.success('User Created Successfully.', 'Success Alert', {timeOut: 5000});
+                    if(response.data.errormessage.length > 0){
+                        toastr.error("<ul><li>" + response.data.errormessage.join("</li><li>") + "</li></ul>", 'Error Alert', {closeButton: true, positionClass: "toast-top-full-width"});
+                    }else{
+                        toastr.success('User Created Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
+                    }
+                    this.loading = false;
                 }, (response) => {
                     this.formErrors = response.data;
+                    this.loading = false;
                 });
             }).catch(() => {
-                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000});
+                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000, positionClass: "toast-top-full-width"});
                 return false;
             });
         },
@@ -104,14 +111,22 @@ new Vue({
         deleteUser: function(user){
             this.$http.delete('/vueusers/'+user.id).then((response) => {
                 this.changePage(this.pagination.current_page);
-                toastr.success('User Deleted Successfully.', 'Success Alert', {timeOut: 5000});
+                if(response.data.errormessage.length > 0){
+                    toastr.error("<ul><li>" + response.data.errormessage.join("</li><li>") + "</li></ul>", 'Error Alert', {closeButton: true, positionClass: "toast-top-full-width"});
+                }else{
+                    toastr.success('User Deleted Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
+                }
             });
         },
 
         restoreUser: function(user){
             this.$http.patch('/vueusers/'+user.id+'/restore').then((response) => {
                 this.changePage(this.pagination.current_page);
-                toastr.success('User Restored Successfully.', 'Success Alert', {timeOut: 5000});
+                if(response.data.errormessage.length > 0){
+                    toastr.error("<ul><li>" + response.data.errormessage.join("</li><li>") + "</li></ul>", 'Error Alert', {closeButton: true, positionClass: "toast-top-full-width"});
+                }else{
+                    toastr.success('User Restored Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
+                }
             });
         },
 
@@ -134,16 +149,23 @@ new Vue({
         updateUser: function(id, scope){
             this.$validator.validateAll(scope).then(() => {
                 var input = this.fillUser;
+                this.loading = true;
                 this.$http.put('/vueusers/'+id,input).then((response) => {
-                    //this.changePage(this.pagination.current_page); - @TODO
                     this.fillUser = {'name':'','username': '','gender':'', 'phone':'', 'email':'', 'address':''};
                     $("#edit-user").modal('hide');
-                    toastr.success('User Updated Successfully.', 'Success Alert', {timeOut: 5000});
+                    if(response.data.errormessage.length > 0){
+                        toastr.error("<ul><li>" + response.data.errormessage.join("</li><li>") + "</li></ul>", 'Error Alert', {closeButton: true, positionClass: "toast-top-full-width"});
+                    }else{
+                        toastr.success('User updated successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
+                    }
+                    this.getVueUsers(this.pagination.current_page);
+                    this.loading = false;
                 }, (response) => {
                     this.formErrorsUpdate = response.data;
+                    this.loading = false;
                 });
             }).catch(() => {
-                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000});
+                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000, positionClass: "toast-top-full-width"});
                 return false;
             });
         },
@@ -215,13 +237,13 @@ new Vue({
                 this.$http.post('/batch/register', input).then((response) => {
                     this.uploadify = {'excel':''};
                     $("#batch-registration").modal('hide');
-                    toastr.success('Data Uploaded Successfully.', 'Success Alert', {timeOut: 5000});
+                    toastr.success('Data Uploaded Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
                     this.errors.clear();
                 }, (response) => {
                     // 
                 });
             /*}).catch(() => {
-                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000});
+                toastr.error('Please fill in the fields as required.', 'Validation Failed', {timeOut: 5000, positionClass: "toast-top-full-width"});
             });*/
         },
 
@@ -237,16 +259,19 @@ new Vue({
         importUsers(scope){
             this.$validator.validateAll(scope).then(() => {
                 var input = this.upload;
+                this.loading = true;
                 this.$http.post('/import/users', input).then((response) => {
                     this.upload = {'list':''};
                     $("#import-users-list").modal('hide');
-                    toastr.success('Data Uploaded Successfully.', 'Success Alert', {timeOut: 5000});
+                    toastr.success('Data Uploaded Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
                     this.errors.clear();
+                    this.loading = false;
                 }, (response) => {
                     // 
+                    this.loading = false;
                 });
             }).catch(() => {
-                toastr.error('Please upload a file.', 'Validation Failed', {timeOut: 5000});
+                toastr.error('Please upload a file.', 'Validation Failed', {timeOut: 5000, positionClass: "toast-top-full-width"});
             });
         },
         listChanged(e){
@@ -272,13 +297,13 @@ new Vue({
                 if(response.data.error)
                 {
                     this.error = response.data.error;
-                    toastr.error(this.error, 'Search Notification', {timeOut: 5000});
+                    toastr.error(this.error, 'Search Notification', {timeOut: 5000, positionClass: "toast-top-full-width"});
                 }
                 else
                 {
                     this.users = response.data.data.data;
                     this.pagination = response.data.pagination;
-                    toastr.success('The search results below were obtained.', 'Search Notification', {timeOut: 5000});
+                    toastr.success('The search results below were obtained.', 'Search Notification', {timeOut: 5000, positionClass: "toast-top-full-width"});
                 }
                 // The request is finished, change the loading to false again.
                 this.loading = false;
@@ -322,13 +347,16 @@ new Vue({
 
         transUser: function(id){
             var input = this.transferUser;
+            this.loading = true;
             this.$http.put('/transfer/'+id,input).then((response) => {
                 this.changePage(this.pagination.current_page);
                 this.transferUser = {'facility_id':'', 'program_id':'','id': ''};
                 $("#transfer-user").modal('hide');
-                toastr.success('User Updated Successfully.', 'Success Alert', {timeOut: 5000});
+                toastr.success('User Updated Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
+                this.loading = false;
             }, (response) => {
                 this.formTransErrors = response.data;
+                this.loading = false;
             });
         },
 
@@ -346,13 +374,13 @@ new Vue({
                 if(response.data.error)
                 {
                     this.error = response.data.error;
-                    toastr.error(this.error, 'Error Notification', {timeOut: 5000});
+                    toastr.error(this.error, 'Error Notification', {timeOut: 5000, positionClass: "toast-top-full-width"});
                 }
                 else
                 {
                     this.users = response.data.data.data;
                     this.pagination = response.data.pagination;
-                    toastr.success('The results below were obtained.', 'Filter Notification', {timeOut: 5000});
+                    toastr.success('The results below were obtained.', 'Filter Notification', {timeOut: 5000, positionClass: "toast-top-full-width"});
                 }
                 // The request is finished, change the loading to false again.
                 this.loading = false;
@@ -365,13 +393,16 @@ new Vue({
 
         approveUser: function(id){
             var input = this.someUser;
+            this.loading = true;
             this.$http.put('/approve/'+id, input).then((response) => {
                 this.changePage(this.pagination.current_page);
                 this.someUser = {'facility_id':'','program_id':'','sub_county_id':'','county_id':'','facility':'','program':'','sub_county':'','county':'','in_charge':'', 'id':''};
                 $("#approve-user").modal('hide');
-                toastr.success('User Approved Successfully.', 'Success Alert', {timeOut: 5000});
+                toastr.success('User Approved Successfully.', 'Success Alert', {timeOut: 5000, positionClass: "toast-top-full-width"});
+                this.loading = false;
             }, (response) => {
                 // 
+                this.loading = false;
             });
         },
     }

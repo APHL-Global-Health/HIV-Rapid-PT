@@ -111,54 +111,36 @@ class UserController extends Controller
             'phone' => 'required',
             'email' => 'required',
             'address' => 'required',
-            'username' => 'required'
+            'username' => 'required|unique:users'
         ]);
         $request->merge(['password' => Hash::make(User::DEFAULT_PASSWORD)]);
+
         $create = User::create($request->all());
+        $errorMessage = [];
+
         if($request->role)
         {
             $role = $request->role;
-            $tier = NULL;
-            $program_id = NULL;
-            if($role == Role::idByName("Partner"))
-            {
-                $tier = implode(", ", $request->jimbo);
-            }
-            else if($role == Role::idByName("County Coordinator"))
-            {
-                $tier = $request->county_id;
-            }
-            else if($role == Role::idByName("Sub-County Coordinator"))
-            {
-                $tier = $request->sub_id;
-            }
-            else if($role == Role::idByName("Participant"))
-            {
-                $tier = $request->facility_id;
-                $program_id = $request->program_id;
-            }
-            else if($role == Role::idByName("Facility Incharge"))
-            {
-                $tier = $request->facility_id;
-            }
+
+            $tierProgram = $this->getUserTierAndProgram($role, $request);
+            $tier = $tierProgram[0];
+            $program_id = $tierProgram[1];
+
             $ru = DB::table('role_user')->insert(["user_id" => $create->id, "role_id" => $role, "tier" => $tier, "program_id" => $program_id]);
-            //  SMS and email notification
-            $token = app('auth.password.broker')->createToken($create);
-            $create->token = $token;
-            $create->notify(new AccountNote($create));
+
+            //  Try to send email notification
+            $emailError = $this->sendUserEmail($create, new AccountNote($create));
+            if(strlen($emailError) > 0) $errorMessage[] = $emailError;
             
+            //  Try to send SMS notification
             $message    = "Dear ".$create->name.", your PT system account has been created. Use the link sent to your email address to get started.";
-            try 
-            {
-                $smsHandler = new SmsHandler();
-                $smsHandler->sendMessage($create->phone, $message);
-            }
-            catch ( AfricasTalkingGatewayException $e )
-            {
-                echo "Encountered an error while sending: ".$e->getMessage();
-            }
+            $smsError = $this->sendUserSMS($create, $message);
+            if(strlen($smsError) > 0) $errorMessage[] = $smsError;
 
         }
+        $create = (array)$create;
+        $create['errormessage'] = $errorMessage;
+
         return response()->json($create);
     }
 
@@ -181,54 +163,39 @@ class UserController extends Controller
         ]);
 
         $edit = User::find($id)->update($request->all());
+        $errorMessage = []; //Empty array to transmit any error messages
+
         if($request->role)
         {
             $role = $request->role;
-            $tier = NULL;
-            $program_id = NULL;
-            if($role == Role::idByName("Partner"))
-            {
-                $tier = implode(", ", $request->jimbo);
-            }
-            else if($role == Role::idByName("County Coordinator"))
-            {
-                $tier = $request->county_id;
-            }
-            else if($role == Role::idByName("Sub-County Coordinator"))
-            {
-                $tier = $request->sub_id;
-            }
-            else if($role == Role::idByName("Participant"))
-            {
-                $tier = $request->facility_id;
-                $program_id = $request->program_id;
-            }
-            else if($role == Role::idByName("Facility Incharge"))
-            {
-                $tier = $request->facility_id;
-            }
+
+            $tierProgram = $this->getUserTierAndProgram($role, $request);
+            $tier = $tierProgram[0];
+            $program_id = $tierProgram[1];
+
             $user = User::find($id);
             $user->detachAllRoles();
             $ru = DB::table('role_user')->insert(["user_id" => $id, "role_id" => $role, "tier" => $tier, "program_id" => $program_id]);
         }
+
         if(isset($user))
         {
-            //  send email and sms
-            $token = app('auth.password.broker')->createToken($user);
-            $user->token = $token;
-            $user->notify(new WelcomeNote($user));
-            
+            //  try to send email
+            $emailError = $this->sendUserEmail($user, new WelcomeNote($user));
+            if(strlen($emailError) > 0) $errorMessage[] = $emailError;
+
             $message    = "Dear ".$user->name.", Your HIV PT System account has been created. Your username is ".$user->username.". Use the link sent to your email to get started.";
-            try 
-            {
-                $smsHandler = new SmsHandler();
-                $smsHandler->sendMessage($user->phone, $message);
-            }
-            catch ( AfricasTalkingGatewayException $e )
-            {
-                echo "Encountered an error while sending: ".$e->getMessage();
-            }
+
+            //  try to send sms
+            $smsError = $this->sendUserSMS($user, $message);
+            if(strlen($smsError) > 0) $errorMessage[] = $smsError;
+
         }
+
+        $edit = (array)$edit;
+        $edit['errormessage'] = $errorMessage;
+        \Log::info($edit);
+
         return response()->json($edit);
     }
 
@@ -241,18 +208,15 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::find($id);
-        $message    = "Dear ".$user->name.", NPHL has disabled your account.";
-        try 
-        {
-            $smsHandler = new SmsHandler();
-            $smsHandler->sendMessage($user->phone, $message);
-        }
-        catch ( AfricasTalkingGatewayException $e )
-        {
-            echo "Encountered an error while sending: ".$e->getMessage();
-        }
+
         $user->delete();
-        return response()->json(['done']);
+
+        //  try to send sms
+        $message    = "Dear ".$user->name.", NPHL has disabled your account.";
+        $smsError = $this->sendUserSMS($user, $message);
+        if(strlen($smsError) > 0) $errorMessage[] = $smsError;
+
+        return response()->json(['done', 'errormessage' => [$smsError]]);
     }
 
     /**
@@ -265,16 +229,10 @@ class UserController extends Controller
     {
         $user = User::withTrashed()->find($id)->restore();
         $message    = "Dear ".$user->name.", NPHL has enabled your account.";
-        try 
-        {
-            $smsHandler = new SmsHandler();
-            $smsHandler->sendMessage($user->phone, $message);
-        }
-        catch ( AfricasTalkingGatewayException $e )
-        {
-            echo "Encountered an error while sending: ".$e->getMessage();
-        }
-        return response()->json(['done']);
+        $smsError = $this->sendUserSMS($user, $message);
+        if(strlen($smsError) > 0) $errorMessage[] = $smsError;
+
+        return response()->json(['done', 'errormessage' => [$smsError]]);
     }
     /**
      * Function to return list of tester-ranges.
@@ -470,6 +428,7 @@ class UserController extends Controller
      */
     public function register(Request $request)
     {
+        $errorMessage = [];
         $now = Carbon::now('Africa/Nairobi');
         //  Prepare to save user details
         //  Check if user exists
@@ -525,28 +484,20 @@ class UserController extends Controller
         $user->sms_code = $token;
         $user->save();
         $message    = "Your Verification Code is: ".$token;
-        try 
-        {
-            $smsHandler = new SmsHandler();
-            $smsHandler->sendMessage($user->phone, $message);
-        }
-        catch ( AfricasTalkingGatewayException $e )
-        {
-            echo "Encountered an error while sending: ".$e->getMessage();
-        }
+
+        $smsError = $this->sendUserSMS($user, $message);
+        if(strlen($smsError) > 0) $errorMessage[] = $smsError;
+
         //  Do Email verification for email address
         $user->email_verification_code = Str::random(60);
         $user->save();
-        $user->notify(new SendVerificationCode($user));
-        /*$usr = $user->toArray();
 
-        Mail::send('auth.verification', $usr, function($message) use ($usr) {
-            $message->to($usr['email']);
-            $message->subject('National HIV PT - Email Verification Code');
-        });*/
+        $emailError = $this->sendUserEmail($user, new SendVerificationCode($user));
+        if(strlen($emailError) > 0) $errorMessage[] = $emailError;
 
-        return response()->json(['phone' => $user->phone]);        
+        return response()->json(['phone' => $user->phone, 'errormessage' => $errorMessage]);        
     }
+
     /**
      * Import the data in the worksheet
      *
@@ -807,11 +758,10 @@ class UserController extends Controller
                             //  Prepare to save role-user details
                             $roleId = Role::idByName('Participant');
                             DB::table('role_user')->insert(['user_id' => $userId, 'role_id' => $roleId, 'tier' => $facilityId, 'program_id' => Program::idByTitle($tprog), "designation" => $tdes]);
-                            //  send email and sms
-                            $token = app('auth.password.broker')->createToken($user);
-                            $user->token = $token;
-                            $user->notify(new WelcomeNote($user));
                             
+                            //  send email and sms
+                            $emailError = $this->sendUserEmail($user, new WelcomeNote($user));
+                            if(strlen($emailError) > 0) $errorMessage[] = $emailError;
 
                             //  Bulk-sms settings
                             $api = DB::table('bulk_sms_settings')->first();
@@ -823,15 +773,8 @@ class UserController extends Controller
                             $message    = "Dear ".$user->name.", NPHL has approved your request to participate in PT. Your tester ID is ".$user->uid.". Use the link sent to your email to get started.";
                             // Create a new instance of our awesome gateway class
                             $gateway    = new Bulk($username, $apikey);
-                            try 
-                            {
-                                $smsHandler = new SmsHandler();
-                                $smsHandler->sendMessage($user->phone, $message);
-                            }
-                            catch ( AfricasTalkingGatewayException $e )
-                            {
-                                echo "Encountered an error while sending: ".$e->getMessage();
-                            }
+                            $smsError = $this->sendUserSMS($user, $message);
+                            if(strlen($smsError) > 0) $errorMessage[] = $smsError;
                         }
                     }
                 }
@@ -891,5 +834,88 @@ class UserController extends Controller
         return redirect()->to('verified')
                 ->with('warning', "Your token is invalid.");
     }
+
+    /**
+     * Send user email
+     *
+     * @param  $user, $messageObject
+     * @return string
+     */
+    public function sendUserEmail($user, $messageObject)
+    {
+        $error = "";
+        try {
+            
+            $token = app('auth.password.broker')->createToken($user);
+            $user->token = $token;
+
+            $user->notify($messageObject);
+        
+        } catch (\Exception $e) {
+
+            $error = 'Error sending email. Please notify your system administrator.';
+            \Log::error("Failure sending email:\n". $e->getMessage());
+        }
+
+        return $error;
+    }
+
+    /**
+     * Send user SMS
+     *
+     * @param  $user, $message
+     * @return string
+     */
+    public function sendUserSMS($user, $message)
+    {
+        $error = "";
+        try {
+            
+            $smsHandler = new SmsHandler();
+            $smsHandler->sendMessage($user->phone, $message);
+        } catch (\Exception $e) {
+
+            $error = 'Error sending SMS. Please notify your system administrator.';
+            \Log::error("Failure sending SMS:\n". $e->getMessage());
+        }
+
+        return $error;
+    }
+
+    /**
+     * Set user tier and programID
+     *
+     * @param  $role, $request
+     * @return array
+     */
+    public function getUserTierAndProgram($role, $request)
+    {
+        $tier = NULL;
+        $programID= NULL;
+        if($role == Role::idByName("Partner"))
+        {
+            $tier = implode(", ", $request->jimbo);
+        }
+        else if($role == Role::idByName("County Coordinator"))
+        {
+            $tier = $request->county_id;
+        }
+        else if($role == Role::idByName("Sub-County Coordinator"))
+        {
+            $tier = $request->sub_id;
+        }
+        else if($role == Role::idByName("Participant"))
+        {
+            $tier = $request->facility_id;
+            $programID= $request->program_id;
+        }
+        else if($role == Role::idByName("Facility Incharge"))
+        {
+            $tier = $request->facility_id;
+        }
+
+        return [$tier, $programID];
+    }    
+
 }
 $excel = App::make('excel');
