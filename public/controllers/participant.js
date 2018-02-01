@@ -40,7 +40,8 @@ new Vue({
         sexes: [],
         uploadify: {excel: ''},
         upload: {list: ''},
-        designations: []
+        designations: [],
+        reasons: { 'reason': '' }
     },
 
     computed: {
@@ -386,6 +387,7 @@ new Vue({
             this.someUser.facility = user.fac;
             this.someUser.program = user.prog;
             this.someUser.designation = user.des;
+            this.someUser.status = user.status;
             $("#approve-user").modal('show');
         },
 
@@ -402,53 +404,30 @@ new Vue({
         },
 
         denyUser: function(id){
-            var input = this.someUser;
+            $(document).off('focusin.modal');
 
-            /*swal({
-                  title: "Are you sure?",
-                  type: "warning",
-                  showCancelButton: true,
-                  confirmButtonClass: "btn-danger",
-
-                  confirmButtonText: "Yes",
-                  cancelButtonText: "No",
-                  closeOnConfirm: false,
-                  closeOnCancel: true,
-                  
-            },
-            function(isConfirm) {
-                if (isConfirm) {
-                    this.$http.put('/denyUserVerification/'+id, input).then((response) => {
-                        this.changePage(this.pagination.current_page);
-                        this.someUser = {'name':'','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'', 'county':'', 'sub_county':'', 'mfl':'', 'facility':'', 'program':'', 'designation':''},
-                        $("#approve-user").modal('hide');
-                        toastr.success('PT participation request successfully rejected.', 'Success Alert', {timeOut: 5000});
-                    });
-                } else {
-                    alert('Mahako');
-                    this.changePage(this.pagination.current_page);
-                    $("#approve-user").modal('hide');
-                }
-            }.bind(this));*/
-
+            // var input = this.someUser;
             swal({
                     title: "Enter reason for rejection.",
                     type: "input",
                     showCancelButton: true,
-                    closeOnConfirm: false,
+                    closeOnConfirm: true,
                     animation: "slide-from-top",
                     inputPlaceholder: "e.g. 123"
                 },
-                function(inputValue)
+                function(reason)
                 {
-                    if (inputValue === false) return false;
+                    if (reason === false) return false;
                   
-                    if (inputValue.length == 0) {
+                    if (reason.length == 0) {
                         swal.showInputError("Please enter the reason for rejection.");
                         return false
                     }
                     else
-                    {          
+                    {    
+                        this.reasons.reason = reason;  
+                        var input = this.reasons;
+
                         this.$http.put('/denyUserVerification/'+id, input).then((response) => {
                             this.changePage(this.pagination.current_page);
                             this.someUser = {'name':'','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'', 'county':'', 'sub_county':'', 'mfl':'', 'facility':'', 'program':'', 'designation':''},
@@ -458,6 +437,7 @@ new Vue({
                     }
                 }.bind(this)
             );
+            $(document).on('focusin.modal');
         },
 
         loadDesignations: function() {

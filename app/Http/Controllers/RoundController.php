@@ -402,7 +402,13 @@ class RoundController extends Controller
         $suffix = "ROUND ".$roundId." PARTICIPANTS SUMMARY";
         $title = "";
         $users = NULL;
-        $roleId = Role::idByName('Participant');
+        $roleId = Role::idByName('Participant');        
+        //check if anyone registered for that round is enrolled to tha round
+        $p = Enrol::where('round_id',$rId)->get();
+        if(count($p) == 0){
+            Session()->flash ('message',"The round has no participants please add participants to the round");
+            return back();
+        }
         //  workbook title
         if(Auth::user()->isCountyCoordinator())
             $title = County::find(Auth::user()->ru()->tier)->name." COUNTY ".$suffix;
@@ -421,8 +427,7 @@ class RoundController extends Controller
                 if($request->status)
                     $ids = User::whereIn('id', $ids)->whereBetween('date_registered', [$round->start_date, $round->end_date])->pluck('id');
                 $testers = Enrol::where('round_id', $rId)->whereIn('user_id', $ids)->pluck('user_id')->toArray();
-                $testers = implode(",", $testers);
-
+                $testers = implode(",", $testers);               
                 $summary = [];
                 $sheetTitle = $county;
                 if (empty($testers)) {
@@ -577,198 +582,220 @@ class RoundController extends Controller
 
         //  get today's date
         $today = Carbon::today();
-        // dd();
         //  Handle the import
         //  Get the results
         //  Import a user provided file
         //  Convert file to csv
         if(Auth::user()->isCountyCoordinator())
-            $data = Excel::load('public/batch/'.$id.'/'.$county.'/'.$fileName, function($reader) {$reader->ignoreEmpty();})->get();
+            $loadedFile = Excel::load('public/batch/'.$id.'/'.$county.'/'.$fileName, function($reader) {$reader->ignoreEmpty();})->get();
         else
-            $data = Excel::load('public/batch/'.$id.'/nphls/'.$fileName, function($reader) {$reader->ignoreEmpty();})->get();
-        if(!empty($data) && $data->count())
+            $loadedFile = Excel::load('public/batch/'.$id.'/nphls/'.$fileName, function($reader) {$reader->ignoreEmpty();})->get();
+        if(!empty($loadedFile) && $loadedFile->count())
         {
-            foreach ($data->toArray() as $harvey => $specter)
-            {
-                if(!empty($specter))
+            $duplicates = array();
+            foreach($loadedFile as $sheet){
+                foreach ($sheet->toArray() as $harvey => $specter)
                 {
-                    $county = NULL;
-                    $sub_county = NULL;
-                    $facility = NULL;
-                    $mfl = NULL;
-                    $uid = NULL;
-                    $tfname = NULL;
-                    $tsname = NULL;
-                    $toname = NULL;
-                    $tgender = NULL;
-                    $tphone = NULL;
-                    $temail = NULL;
-                    $taddress = NULL;
-                    $tdes = NULL;
-                    $tprog = NULL;
-                    $incharge = NULL;
-                    $iphone = NULL;
-                    $iemail = NULL;
-                    foreach ($specter as $mike => $ross) 
+                    if(!empty($specter))
                     {
-                        if(strcmp($mike, "county") === 0)
-                            $county = $ross;
-                        if(strcmp($mike, "sub_county") === 0)
-                            $sub_county = $ross;
-                        if(strcmp($mike, "facility") === 0)
-                            $facility = $ross;
-                        if(strcmp($mike, "mfl_code") === 0)
-                            $mfl = $ross;
-                        if(strcmp($mike, "tester_enrollment_id") === 0)
-                            $uid = $ross;
-                        if(strcmp($mike, "tester_first_name") === 0)
-                            $tfname = $ross;
-                        if(strcmp($mike, "tester_surname") === 0)
-                            $tsname = $ross;
-                        if(strcmp($mike, "tester_other_name") === 0)
-                            $toname = $ross;
-                        if(strcmp($mike, "gender") === 0)
-                            $tgender = $ross;
-                        if(strcmp($mike, "tester_mobile_number") === 0)
-                            $tphone = $ross;
-                        if(strcmp($mike, "tester_email") === 0)
-                            $temail = $ross;
-                        if(strcmp($mike, "tester_address") === 0)
-                            $taddress = $ross;
-                        if(strcmp($mike, "designation") === 0)
-                            $tdes = $ross;
-                        if(strcmp($mike, "program") === 0)
-                            $tprog = $ross;
-                        if(strcmp($mike, "in_charge") === 0)
-                            $incharge = $ross;
-                        if(strcmp($mike, "in_charge_email") === 0)
-                            $iemail = $ross;
-                        if(strcmp($mike, "in_charge_phone") === 0)
-                            $iphone = $ross;
-                    }
-                    //  process gender
-                    if(strcmp($tgender, "Male") === 0)
-                        $tgender = User::MALE;
-                    else
-                        $tgender = User::FEMALE;
-                    //  process designation
-                    $testerDes = $tdes;
-                    if($testerDes)
-                    {
-                        $tdes = Designation::idByTitle($tdes);
-                        if(!$tdes)
+                        $county = NULL;
+                        $sub_county = NULL;
+                        $facility = NULL;
+                        $mfl = NULL;
+                        $uid = NULL;
+                        $tfname = NULL;
+                        $tsname = NULL;
+                        $toname = NULL;
+                        $tgender = NULL;
+                        $tphone = NULL;
+                        $temail = NULL;
+                        $taddress = NULL;
+                        $tdes = NULL;
+                        $tprog = NULL;
+                        $incharge = NULL;
+                        $iphone = NULL;
+                        $iemail = NULL;
+                        foreach ($specter as $mike => $ross) 
                         {
-                            $des = new Designation;
-                            $des->name = $testerDes;
-                            $des->save();
-                            $tdes = $des->id;
+                            if(strcmp($mike, "county") === 0)
+                                $county = $ross;
+                            if(strcmp($mike, "sub_county") === 0)
+                                $sub_county = $ross;
+                            if(strcmp($mike, "facility") === 0)
+                                $facility = $ross;
+                            if(strcmp($mike, "mfl_code") === 0)
+                                $mfl = $ross;
+                            if(strcmp($mike, "tester_enrollment_id") === 0)
+                                $uid = $ross;
+                            if(strcmp($mike, "tester_first_name") === 0)
+                                $tfname = $ross;
+                            if(strcmp($mike, "tester_surname") === 0)
+                                $tsname = $ross;
+                            if(strcmp($mike, "tester_other_name") === 0)
+                                $toname = $ross;
+                            if(strcmp($mike, "gender") === 0)
+                                $tgender = $ross;
+                            if(strcmp($mike, "tester_mobile_number") === 0)
+                                $tphone = $ross;
+                            if(strcmp($mike, "tester_email") === 0)
+                                $temail = $ross;
+                            if(strcmp($mike, "tester_address") === 0)
+                                $taddress = $ross;
+                            if(strcmp($mike, "designation") === 0)
+                                $tdes = $ross;
+                            if(strcmp($mike, "program") === 0)
+                                $tprog = $ross;
+                            if(strcmp($mike, "in_charge") === 0)
+                                $incharge = $ross;
+                            if(strcmp($mike, "in_charge_email") === 0)
+                                $iemail = $ross;
+                            if(strcmp($mike, "in_charge_phone") === 0)
+                                $iphone = $ross;
                         }
-                    }
-
-                    if(strcmp($county, "MURANGA") === 0)
-                        $county = "Murang'a";
-                    if(strcmp($county, "HOMABAY") === 0)
-                        $county = "Homa Bay";
-                    if(strcmp($county, "THARAKA-NITHI") === 0)
-                        $county = "Tharaka Nithi";
-
-                    //  process user details only if the name exists
-                    if($uid)
-                    {
-                        $user = User::find(User::idByUid($uid));
-                        if(!$user)
+                        //  process gender
+                        if(strcmp($tgender, "Male") === 0)
+                            $tgender = User::MALE;
+                        else
+                            $tgender = User::FEMALE;
+                        //  process designation
+                        $testerDes = $tdes;
+                        if($testerDes)
                         {
-                            $user = new User;
-                            $user->uid = $uid;
+                            $tdes = Designation::idByTitle($tdes);
+                            if(!$tdes)
+                            {
+                                $des = new Designation;
+                                $des->name = $testerDes;
+                                $des->save();
+                                $tdes = $des->id;
+                            }
                         }
-                    }
-                    else
-                    {
-                        $userId = User::idByEmail($temail);
-                        if($userId)
+
+                        if(strcmp($county, "MURANGA") === 0)
+                            $county = "Murang'a";
+                        if(strcmp($county, "HOMABAY") === 0)
+                            $county = "Homa Bay";
+                        if(strcmp($county, "THARAKA-NITHI") === 0)
+                            $county = "Tharaka Nithi";
+
+                        //  process user details only if the name exists
+                        if($uid)
                         {
-                            $user = User::find($userId);
-                            $user->uid = $user->uid;
+                            $user = User::find(User::idByUid($uid));
+                            if(!$user)
+                            {
+                                $user = new User;
+                                $user->uid = $uid;
+                            }
                         }
                         else
                         {
-                            $user = new User;
-                            $user->date_registered = $today;
-                            $count = count(User::where('uid', User::MIN_UNIQUE_ID)->get());
-                            if($count > 0)
-                                $user->uid = DB::table('users')->where('uid', '>=', User::MIN_UNIQUE_ID)->max('uid')+1;
+                            $userId = User::idByEmail($temail);
+                            if($userId)
+                            {
+                                $user = User::find($userId);
+                                $user->uid = $user->uid;
+                            }
                             else
-                                $user->uid = User::MIN_UNIQUE_ID;
+                            {
+                                $user = new User;
+                                $user->date_registered = $today;
+                                $count = count(User::where('uid', User::MIN_UNIQUE_ID)->get());
+                                if($count > 0)
+                                    $user->uid = DB::table('users')->where('uid', '>=', User::MIN_UNIQUE_ID)->max('uid')+1;
+                                else
+                                    $user->uid = User::MIN_UNIQUE_ID;
+                            }
                         }
-                    }
-                    //  process user details
-                    if($tfname && $toname && $tsname && $tphone && $temail && $tprog && $tdes)
-                    {
-                        $user->name = $tsname." ".$tfname." ".$toname;
-                        $user->gender = $tgender;
-                        $user->email = $temail;
-                        $user->phone = $tphone;
-                        $user->address = $taddress;
-                        $user->username = uniqid();
-                        $user->phone_verified = 1;
-                        $user->email_verified = 1;
-                        $user->save();
-                        $user->username = $user->uid;
-                        $user->password = Hash::make(User::DEFAULT_PASSWORD);
-                        $user->save();
-                        $userId = $user->id;
+                        //  process user details
+                        if($tfname && $tsname && $tphone && $temail && $tprog && $tdes)
+                        {
+                            if(count(User::where('email', $temail)->orWhere('phone', $tphone)->get()) > 0){
+                                $duplicateParticapant = array($tfname, $tsname, $tphone, $temail);
+                                $duplicates[] = $duplicateParticapant;
+                                continue;
+                            }
+                            $user->name = $tsname." ".$tfname." ".$toname;
+                            $user->gender = $tgender;
+                            $user->email = $temail;
+                            $user->phone = $tphone;
+                            $user->address = $taddress;
+                            $user->username = uniqid();
+                            $user->phone_verified = 1;
+                            $user->email_verified = 1;
+                            $user->save();
+                            $user->username = $user->uid;
+                            $user->password = Hash::make(User::DEFAULT_PASSWORD);
+                            $user->save();
+                            $userId = $user->id;
 
-                        //  Prepare to save facility details
-                        $facilityId = Facility::idByCode($mfl);
-                        if(!$facilityId)
-                            $facilityId = Facility::idByName(trim($facility));
-                        if($facilityId)
-                            $fc = Facility::find($facilityId);
-                        else
-                            $fc = new Facility;
-                        $fc->code = $mfl;
-                        $fc->name = $facility;
-                        $fc->in_charge = $incharge;
-                        $fc->in_charge_phone = $iphone;
-                        $fc->in_charge_email = $iemail;
-                        //  Get sub-county
-                        $sub_county_id = SubCounty::idByName($sub_county);
-                        if(!$sub_county_id)
-                        {
-                            $sb = new SubCounty;
-                            $sb->name = $sub_county;
-                            $sb->county_id = County::idByName($county);
-                            $sb->save();
-                            $sub_county_id = $sb->id;
-                        }
-                        $fc->sub_county_id = $sub_county_id;
-                        $fc->save();
-                        $facilityId = $fc->id;
-                        //  Prepare to save role-user details
-                        $roleId = Role::idByName('Participant');
-                        $user->detachAllRoles();
-                        DB::table('role_user')->insert(['user_id' => $userId, 'role_id' => $roleId, 'tier' => $facilityId, 'program_id' => Program::idByTitle($tprog), "designation" => $tdes]);
-                        //  Enrol the participant to the pt round
-                        $userId = $user->id;
-                        $roundId = $rId;
-                        $enrol = Enrol::where('round_id', $roundId)->where('user_id', $userId)->get();
-                        if(count($enrol) == 0)
-                        {
-                            $enrol = new Enrol;
-                            $enrol->round_id = $roundId;
-                            $enrol->user_id = $userId;
-                            $enrol->save();
-                        }
-                        //  send email and sms for registration
-                        
-                        if($user->date_registered)
-                        {
-                            //  send email and sms
-                            $token = app('auth.password.broker')->createToken($user);
-                            $user->token = $token;
-                            $user->notify(new WelcomeNote($user));
+                            //  Prepare to save new facility details
+                            $facilityId = Facility::idByCode($mfl);
+                            if(!$facilityId)
+                            {
+                                $fc = new Facility;
+                                $fc->code = $mfl;
+                                $fc->name = $facility;
+                                $fc->in_charge = $incharge;
+                                $fc->in_charge_phone = $iphone;
+                                $fc->in_charge_email = $iemail;
+
+                                //  Get sub-county
+                                $sub_county_id = SubCounty::idByName($sub_county);
+                                if(!$sub_county_id)
+                                {
+                                    $sb = new SubCounty;
+                                    $sb->name = $sub_county;
+                                    $sb->county_id = County::idByName($county);
+                                    $sb->save();
+                                    $sub_county_id = $sb->id;
+                                }
+                                $fc->sub_county_id = $sub_county_id;
+                                $fc->save();
+                                $facilityId = $fc->id;
+                            }                                
                             
-                            $message    = "Dear ".$user->name.", NPHL has approved your request to participate in PT. Your tester ID is ".$user->uid.". Use the link sent to your email to get started.";
+                            //  Prepare to save role-user details
+                            $roleId = Role::idByName('Participant');
+                            $user->detachAllRoles();
+                            DB::table('role_user')->insert(['user_id' => $userId, 'role_id' => $roleId, 'tier' => $facilityId, 'program_id' => Program::idByTitle($tprog), "designation" => $tdes]);
+                            //  Enrol the participant to the pt round
+                            $userId = $user->id;
+                            $roundId = $rId;
+                            $enrol = Enrol::where('round_id', $roundId)->where('user_id', $userId)->get();
+                            if(count($enrol) == 0)
+                            {
+                                $enrol = new Enrol;
+                                $enrol->round_id = $roundId;
+                                $enrol->user_id = $userId;
+                                $enrol->save();
+                            }
+                            //  send email and sms for registration
+                            
+                            if($user->date_registered)
+                            {
+                                //  send email and sms
+                                $token = app('auth.password.broker')->createToken($user);
+                                $user->token = $token;
+                                $user->notify(new WelcomeNote($user));
+                                $message    = "Dear ".$user->name.", NPHL has approved your request to participate in PT. Your tester ID is ".$user->uid.". Use the link sent to your email to get started.";
+                                try 
+                                {
+                                    $smsHandler = new SmsHandler();
+                                    $smsHandler->sendMessage($user->phone, $message);
+                                }
+                                catch ( AfricasTalkingGatewayException $e )
+                                {
+                                    echo "Encountered an error while sending: ".$e->getMessage();
+                                }
+                            }
+                            //  Enrollment notifications
+                            $round = Round::find($roundId)->name;
+                            $message = Notification::where('template', Notification::ENROLMENT)->first()->message;
+                            $message = ApiController::replace_between($message, '[', ']', $round);
+                            $message = str_replace(' [', ' ', $message);
+                            $message = str_replace('] ', ' ', $message);
+                            $message = "Dear ".$user->name.", you have been enrolled to PT round ".$round.". If not participating, contact your county lab coordinator.";
                             try 
                             {
                                 $smsHandler = new SmsHandler();
@@ -778,29 +805,15 @@ class RoundController extends Controller
                             {
                                 echo "Encountered an error while sending: ".$e->getMessage();
                             }
+                            $user->round = $round;                        
+                            $user->notify(new EnrollmentNote($user));
+                            //  Bulk-sms settings
+                            
                         }
-                        //  Enrollment notifications
-                        $round = Round::find($roundId)->name;
-                        /*$message = Notification::where('template', Notification::ENROLMENT)->first()->message;
-                        $message = ApiController::replace_between($message, '[', ']', $round);
-                        $message = str_replace(' [', ' ', $message);
-                        $message = str_replace('] ', ' ', $message);*/
-                        $message = "Dear ".$user->name.", you have been enrolled to PT round ".$round.". If not participating, contact your county lab coordinator.";
-                        try 
-                        {
-                            $smsHandler = new SmsHandler();
-                            $smsHandler->sendMessage($user->phone, $message);
-                        }
-                        catch ( AfricasTalkingGatewayException $e )
-                        {
-                            echo "Encountered an error while sending: ".$e->getMessage();
-                        }
-                        $user->round = $round;                        
-                        $user->notify(new EnrollmentNote($user));
-                        //  Bulk-sms settings
                     }
                 }
             }
+            return response()->json(array('errors' => $duplicates));
         }
     }
 }

@@ -87,106 +87,105 @@ class ResultController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    {           
+                //return response()->json('Saved.');
+        //Check if round has been         
+        if ($request->get('round_id') =="") {
+            return response()->json(['1']);            
+        } else
+        {
+             //	Save pt first then proceed to save form fields
+            $round_id = $request->get('round_id');
+            $enrolment = Enrol::where('user_id', Auth::user()->id)->where('round_id', $round_id)->first();
+            
+            //Validation: Check if the enrolment results have been submitted
+            if ($enrolment->status ==1) {
+                return response()->json(['2']);            
+            }else
+            {   
+                $pt = new Pt;
+                $pt->enrolment_id = $enrolment->id;
+                $pt->panel_status = Pt::NOT_CHECKED;
+                $pt->save();
+
+                //update enrollment status to 1
+                $enrolment->status = Enrol::DONE;        
+                $enrolment->save();     
+                //	Proceed to form-fields
+                foreach ($request->all() as $key => $value)
+                {
+                    if((stripos($key, 'token') !==FALSE) || (stripos($key, 'method') !==FALSE))
+                        continue;
+                    else if(stripos($key, 'field') !==FALSE)
+                    {
+                        $fieldId = $this->strip($key);
+                        if(is_array($value))
+                          $value = implode(', ', $value);
+                        $result = new Result;
+                        $result->pt_id = $pt->id;
+                        $result->field_id = $fieldId;
+                  		$result->response = $value;
+                        $result->save();
+                    }
+                    else if(stripos($key, 'comment') !==FALSE)
+                    {
+                        if($value)
+                        {
+                            $result = Result::where('field_id', $key)->first();
+                            $result->comment = $value;
+                            $result->save();
+                        }
+                    }
+                }    
+                    
+                    //  Send SMS
+                    $round = Round::find($pt->enrolment->round->id)->description;
+                    $message = Notification::where('template', Notification::RESULTS_RECEIVED)->first()->message;
+                    $message = $this->replace_between($message, '[', ']', $round);
+                    $message = str_replace(' [', ' ', $message);
+                    $message = str_replace(']', ' ', $message);
+
+                    $created = Carbon::today()->toDateTimeString();
+                    $updated = Carbon::today()->toDateTimeString();
+                    //  Time
+                    $now = Carbon::now('Africa/Nairobi');
+                    $bulk = DB::table('bulk')->insert(['notification_id' => Notification::RESULTS_RECEIVED, 'round_id' => $pt->enrolment->round->id, 'text' => $message, 'user_id' => $pt->enrolment->user->id, 'date_sent' => $now, 'created_at' => $created, 'updated_at' => $updated]);
+                 // dd($bulk);
+                    $recipients = NULL;
+                    $recipients = User::find($pt->enrolment->user->id)->value('phone');
+                    //  Bulk-sms settings
+                    $api = DB::table('bulk_sms_settings')->first();
+                    $username   = $api->code;
+                    $apikey     = $api->api_key;
+                    if($recipients)
+                    {
+                        // Specified sender-id
+                        // $from = $api->code;
+                        $from ='Nat-HIVPT';
+                        // Create a new instance of Bulk SMS gateway.
+                        $sms    = new Bulk($username, $apikey);
+                        // use try-catch to filter any errors.
+                        try
+                        {
+                        // Send messages
+                        $results = $sms->sendMessage($recipients, $message, $from);
+                        foreach($results as $result)
+                        {
+                            // status is either "Success" or "error message" and save.
+                            $number = $result->number;
+                            //  Save the results
+                            DB::table('broadcast')->insert(['number' => $number, 'bulk_id' => $bulk->id]);
+                        }
+                        }
+                        catch ( AfricasTalkingGatewayException $e )
+                        {
+                        echo "Encountered an error while sending: ".$e->getMessage();
+                        }
+                    }
                 return response()->json('Saved.');
-        // Check if round has been selected
-        // if ($request->get('round_id') =="") {
-        //     return response()->json(['1']);            
-        // } else
-        // {
-        //      //	Save pt first then proceed to save form fields
-        //     $round_id = $request->get('round_id');
-        //     $enrolment = Enrol::where('user_id', Auth::user()->id)->where('round_id', $round_id)->first();
 
-        //     //Validation: Check if the enrolment results have been submitted
-        //     if ($enrolment->status ==1) {
-        //         return response()->json(['2']);            
-        //     }else
-        //     {
-        
-        //         $pt = new Pt;
-        //         $pt->enrolment_id = $enrolment->id;
-        //         $pt->panel_status = Pt::NOT_CHECKED;
-        //         $pt->save();
-
-        //         //update enrollment status to 1
-        //         $enrolment->status = Enrol::DONE;        
-        //         $enrolment->save();
-
-        //         //	Proceed to form-fields
-        //         foreach ($request->all() as $key => $value)
-        //         {
-        //             if((stripos($key, 'token') !==FALSE) || (stripos($key, 'method') !==FALSE))
-        //                 continue;
-        //             else if(stripos($key, 'field') !==FALSE)
-        //             {
-        //                 $fieldId = $this->strip($key);
-        //                 if(is_array($value))
-        //                   $value = implode(', ', $value);
-        //                 $result = new Result;
-        //                 $result->pt_id = $pt->id;
-        //                 $result->field_id = $fieldId;
-        //           		$result->response = $value;
-        //                 $result->save();
-        //             }
-        //             else if(stripos($key, 'comment') !==FALSE)
-        //             {
-        //                 if($value)
-        //                 {
-        //                     $result = Result::where('field_id', $key)->first();
-        //                     $result->comment = $value;
-        //                     $result->save();
-        //                 }
-        //             }
-        //         }    
-        //             //  Send SMS
-        //             $round = Round::find($pt->enrolment->round->id)->description;
-        //             $message = Notification::where('template', Notification::RESULTS_RECEIVED)->first()->message;
-        //             $message = $this->replace_between($message, '[', ']', $round);
-        //             $message = str_replace(' [', ' ', $message);
-        //             $message = str_replace(']', ' ', $message);
-
-        //             $created = Carbon::today()->toDateTimeString();
-        //             $updated = Carbon::today()->toDateTimeString();
-        //             //  Time
-        //             $now = Carbon::now('Africa/Nairobi');
-        //             $bulk = DB::table('bulk')->insert(['notification_id' => Notification::RESULTS_RECEIVED, 'round_id' => $pt->enrolment->round->id, 'text' => $message, 'user_id' => $pt->enrolment->user->id, 'date_sent' => $now, 'created_at' => $created, 'updated_at' => $updated]);
-        //          // dd($bulk);
-        //             $recipients = NULL;
-        //             $recipients = User::find($pt->enrolment->user->id)->value('phone');
-        //             //  Bulk-sms settings
-        //             $api = DB::table('bulk_sms_settings')->first();
-        //             // $username   = $api->code;
-        //             // $apikey     = $api->api_key;
-        //             if($recipients)
-        //             {
-        //                 // Specified sender-id
-        //                 // $from = $api->code;
-        //                 $from ='Nat-HIVPT';
-        //                 // Create a new instance of Bulk SMS gateway.
-        //                 $sms    = new Bulk($username, $apikey);
-        //                 // use try-catch to filter any errors.
-        //                 try
-        //                 {
-        //                 // Send messages
-        //                 $results = $sms->sendMessage($recipients, $message, $from);
-        //                 foreach($results as $result)
-        //                 {
-        //                     // status is either "Success" or "error message" and save.
-        //                     $number = $result->number;
-        //                     //  Save the results
-        //                     DB::table('broadcast')->insert(['number' => $number, 'bulk_id' => $bulk->id]);
-        //                 }
-        //                 }
-        //                 catch ( AfricasTalkingGatewayException $e )
-        //                 {
-        //                 echo "Encountered an error while sending: ".$e->getMessage();
-        //                 }
-        //             }
-        //         return response()->json('Saved.');
-
-        //     }
-        // }
+             }
+         }
     }
 
     /**

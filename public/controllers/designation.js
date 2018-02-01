@@ -113,7 +113,7 @@ new Vue({
         },
 
         editDesignation: function(designation){
-            this.fillDes.name = designation.name;
+            this.fillDesignation.name = designation.name;
             this.fillDesignation.id = designation.id;
             this.fillDesignation.description = designation.description;
             $("#edit-designation").modal('show');

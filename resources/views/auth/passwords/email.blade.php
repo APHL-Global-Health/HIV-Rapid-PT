@@ -17,11 +17,11 @@
             </div> 
             <div class="bs-callout bs-callout-info text-left">
                 <h4 class="md-18">Password Recovery</h4>
-                <p> If you have forgotten your password, fill in your PT Enrollment ID below and click Reset Password button. Instructions will be sent to your registered email on how to reset your password.</p>
+                <p> If you have forgotten your password, fill in your Registered Email below and click Reset Password button. Instructions will be sent to the email on how to reset your password.</p>
             </div>   
             <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                <label for="email">PT Enrollment ID</label>
-                <input id="email" type="email" class="form-control" name="email" placeholder="eg. 19595" value="{{ old('email') }}" required>
+                <label for="email">Registered Email</label>
+                <input id="email" type="email" class="form-control" name="email" placeholder="eg. you@example.com" value="{{ old('email') }}" required>
                 @if ($errors->has('email'))
                     <span class="help-block">
                         <strong>{{ $errors->first('email') }}</strong>

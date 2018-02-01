@@ -146,7 +146,7 @@
                                 <div class="form-group row">
                                     <label class="col-sm-4 form-control-label" :class="{'help is-danger': errors.has('create_material.date-collected') }" for="date-collected">Date Collected:</label>
                                     <div class="col-sm-8" :class="{ 'control': true }">
-                                        <input v-validate="'required'" class="form-control" :class="{'input': true, 'is-danger': errors.has('create_material.date-collected') }" name="date-collected" type="date" placeholder="" v-model="newMaterial.date_collected" />
+                                        <input v-validate="'required|after:date-prepared'" class="form-control" :class="{'input': true, 'is-danger': errors.has('create_material.date-collected') }" name="date-collected" type="date" placeholder="" v-model="newMaterial.date_collected" />
                                         <span v-show="errors.has('create_material.date-collected')" class="help is-danger">@{{ errors.first('create_material.date-collected') }}</span>
                                     </div>
                                 </div>

@@ -54,7 +54,7 @@ class SmsHandler{
     }
 
     public function sendMessage($phone, $message)
-    {
+    { 
         if($phone != null && strlen($phone) >= 9){
             $phone = ltrim($phone, '0');
             $recepient = "+254".$phone;

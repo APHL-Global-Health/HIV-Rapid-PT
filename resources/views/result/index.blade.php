@@ -63,10 +63,10 @@
             </td>
             <td>
             @permission('view-result')
-                <button class="btn btn-sm btn-secondary" @click.prevent="viewResult(result)" disabled><i class="fa fa-reorder"></i> View</button>	
+                <button class="btn btn-sm btn-secondary" @click.prevent="viewResult(result)" ><i class="fa fa-reorder"></i> View</button>	
             @endpermission
             @permission('update-result')
-                <button  v-if="result.panel_status!=3" class="btn btn-sm btn-primary" @click.prevent="editResult(result)" disabled><i class="fa fa-edit"></i> Edit</button>
+                <button  v-if="result.panel_status!=3" class="btn btn-sm btn-primary" @click.prevent="editResult(result)" ><i class="fa fa-edit"></i> Edit</button>
             @endpermission
             @permission('delete-result')
                 <button class="btn btn-sm btn-danger" @click.prevent="deleteResult(result)"><i class="fa fa-power-off"></i> Disable</button>
@@ -166,12 +166,12 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="form-group row" :class="'toggle_'+item.id" style="display:none;">
+                                        <!-- <div class="form-group row" :class="'toggle_'+item.id" style="display:none;">
                                             <label class="col-sm-5 form-control-label text-danger font-weight-bold" for="title">Please Specify:</label>
                                             <div class="col-sm-7">
                                                 <textarea :name="'field_'+item.id" class="form-control"></textarea>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
                                 <div class="form-group row col-sm-offset-5 col-sm-7">
@@ -197,7 +197,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <form method="POST" enctype="multipart/form-data" v-on:submit.prevent="updateResult('update_results')" id="update_test_results" data-vv-validate="update_results">
-                            <input type="text" name="id" :value="frmData.pt">
+                            <input type="hidden"  name="id" :value="frmData.pt"> 
                             <div class="col-md-12">
                                 <div class="form-group row">
                                     <label class="col-sm-5 form-control-label" for="title">PT Round:</label>
@@ -319,7 +319,7 @@
                             </div>
                             <form method="POST" enctype="multipart/form-data" v-on:submit.prevent="verifyResult" id="verify_test_results">
                                 <div v-if="viewFormData.pt">
-                                    <input type="hidden" class="form-control" name="pt_id" :value="viewFormData.pt.id"/>
+                                    <input type="hidden" class="form-control" name="pt_id" :value="viewFormData.pt.id">
                                     <div class="form-group row" v-if="viewFormData.pt.panel_status!=3">
                                         <label class="col-sm-5 form-control-label" for="title"><b>Verification Comment:</b></label>
                                         <div class="col-sm-7">

@@ -33,6 +33,8 @@ new Vue({
         date: '',
         testers: [],
         durations: [],
+        duplicates: [],
+        roundId:'',
         uploadify: {id: '', excel: ''}
     },
 
@@ -214,15 +216,16 @@ new Vue({
             });
         },
 
-        /*loadParticipants: function() {
+        loadParticipants: function(roundID) {
             this.$http.get('/parts').then((response) => {
-                this.participants = response.data.data.data;
-                this.pagination = response.data.pagination;
+                //this.participants = response.data.data.data; 
+                this.roundId = roundID;                             
+                //this.pagination = response.data.pagination;
             }, (response) => {
                 // 
             });
         },
-*/
+
         enrolParticipants: function(){
 		    let myForm = document.getElementById('partFrm');
             let formData = new FormData(myForm);
@@ -257,14 +260,24 @@ new Vue({
             $("#batch-enrolment").modal('show');
         },
 
-        batchEnrol(){
+        batchEnrol: function(){
             // this.$validator.validateAll().then(() => {
                 var input = this.uploadify;
+                this.duplicates = [];
                 this.$http.post('/batch/enrol', input).then((response) => {
-                    this.uploadify = {'id':'','excel':''};
-                    $("#batch-enrolment").modal('hide');
-                    toastr.success('Data uploaded Successfully.', 'Success Alert', {timeOut: 5000});
-                    this.errors.clear();
+                    var resp = JSON.parse(response.body);
+                    if(resp.errors.length > 0){
+                        $("#dups").show();
+                        this.duplicates = resp.errors;
+                        toastr.success('Data uploaded Successfully.', 'Success Alert', {timeOut: 5000});
+                        this.errors.clear();
+                    }
+                    else{
+                        this.uploadify = {'id':'','excel':''};
+                        $("#batch-enrolment").modal('hide');
+                        toastr.success('Data uploaded Successfully.', 'Success Alert', {timeOut: 5000});
+                        this.errors.clear();
+                    }
                 }, (response) => {
                     // 
                 });

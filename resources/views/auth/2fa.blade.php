@@ -64,7 +64,7 @@
                                 <span v-show="errors.has('code')" class="help is-danger">@{{ errors.first('code') }}</span>
                             </div>
                             <div class="col-sm-2">
-                                <button class="btn btn-nephritis btn-block" @click="verifyPhone"><strong><i class="fa fa-check"></i> Verify</strong></button>                            
+                                <button class="btn btn-nephritis btn-block"><strong><i class="fa fa-check"></i> Verify</strong></button>                            
                             </div>
                 </form>
 

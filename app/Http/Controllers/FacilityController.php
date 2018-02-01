@@ -228,7 +228,7 @@ class FacilityController extends Controller
         if(Auth::user()->isCountyCoordinator())
         {
             $id = Auth::user()->ru()->tier;
-            $subs = County::find($id)->subCounties->orderBy('name', 'ASC')->pluck('name', 'id');
+            $subs = County::find($id)->subCounties()->orderBy('name', 'ASC')->pluck('name', 'id');
             $categories = [];
             foreach($subs as $key => $value)
             {

@@ -12,6 +12,9 @@
 <div class="" id="manage-round">
     <!-- Round Listing -->
     <div class="row">
+    @if (Session::has('message'))
+            <div class="alert alert-info">{{ Session::get('message') }}</div>
+        @endif
         <div class="col-lg-12 margin-tb">
             <div class="pull-left col-md-8">
                 <h5><i class="fa fa-book"></i> {!! trans_choice('messages.pt-round', 2) !!}
@@ -70,10 +73,10 @@
                 <button v-if="!round.deleted_at" class="btn btn-sm btn-danger" @click.prevent="deleteRound(round)"><i class="fa fa-power-off"></i> Disable</button>
             @endpermission
             @permission('enrol-participants')
-                <button v-if="!round.deleted_at" class="btn btn-sm btn-wet-asphalt" id="enrol" data-toggle="modal" data-target="#enrol-participants" style="display:none;" :data-fk="round.id" @click.prevent="loadParticipants(1)"><i class="fa fa-send"></i> Enrol</button>
+                <button v-if="!round.deleted_at" class="btn btn-sm btn-wet-asphalt" id="enrol" data-toggle="modal" data-target="#enrol-participants" style="display:none;" :data-fk="round.id" @click.prevent="loadParticipants(1)"><i class="fa fa-send"></i> Enrol</button>                
                 <a v-if="!round.deleted_at" class="btn btn-sm btn-wet-asphalt" :href="'/download/' + round.id" id="enrolled" ><i class="fa fa-level-down"></i> Summary Workbook</a>
                 <button v-if="!round.deleted_at" class="btn btn-sm btn-nephritis" @click.prevent="uploadSheet(round)"><i class="fa fa-level-up"></i> Upload Worksheet</button>
-                <a v-if="!round.deleted_at" class="btn btn-sm btn-new-participants" :href="'/download/'+round.id+'/1'"><i class="fa fa-book"></i> New Participants</a>
+                <button v-if="!round.deleted_at" class="btn btn-sm btn-new-participants" id="enrol" data-toggle="modal" data-target="#enrol-participants" :data-fk="round.id"   @click.prevent="loadParticipants(round.id)"><i class="fa fa-book"></i> New Participants</button>                
             @endpermission
             </td>
         </tr>
@@ -237,7 +240,7 @@
                     <div class="row">
                         <form method="POST" enctype="multipart/form-data" v-on:submit.prevent="enrolParticipants" id="partFrm">
                             <div class="col-md-12">
-                                <input type="hidden" class="form-control" name="round_id" id="round-id" value=""/>
+                                <input type="hidden" class="form-control" name="round_id" id="round-id" v-bind:value="roundId"/>
                                 <table class="table table-bordered">
                                     <tr>
                                         <th>Participant</th>
@@ -297,6 +300,14 @@
                 <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                 <h4 class="modal-title" id="myModalLabel">Batch Enrolment</h4>
+                </div>
+                <div id="dups" class="alert alert-danger" style="display: none">
+                   Some duplicated records were found and ignored.
+                   <ul id="manage-round">
+                      <li v-for="duplicate in duplicates">
+                        @{{ duplicate[0] +', '+ duplicate[1] +', '+ duplicate[2] +', '+ duplicate[3] }}
+                      </li>
+                    </ul>
                 </div>
                 <div class="modal-body">
                     <div class="row">

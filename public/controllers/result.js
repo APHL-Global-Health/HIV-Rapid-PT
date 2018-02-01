@@ -88,7 +88,7 @@ new Vue({
         },
 
         createResult: function(){
-            let myForm = document.getElementById('analysis_results');
+           let myForm = document.getElementById('analysis_results');
             let formData = new FormData(myForm);
       		this.$http.post('/vueresults', formData).then((response) => {
     		    this.changePage(this.pagination.current_page);

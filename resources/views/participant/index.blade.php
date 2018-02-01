@@ -484,7 +484,7 @@
                                 </tbody>
                             </table>
                             <div class="form-group row col-sm-offset-4 col-sm-8">
-                                <button type="submit" class="btn btn-sm btn-success" ><i class='fa fa-plus-circle'></i> Enroll</button>
+                                <button type="submit" class="btn btn-sm btn-success"><i class='fa fa-plus-circle'></i> Enroll</button>
                                 <button type="button" class="btn btn-sm btn-danger" @click="denyUser(someUser.id)"><i class='fa fa-ban'></i> Reject</button>
                                 <button type="button" class="btn btn-sm btn-silver" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"><i class="fa fa-times-circle"></i> {!! trans('messages.cancel') !!}</span></button>
                             </div>
