@@ -27,15 +27,15 @@ new Vue({
         offset: 4,
         formErrors:{},
         formErrorsUpdate:{},
-        newUser : {'name':'','username': '','role': '','gender':'', 'phone':'', 'email':'', 'address':''},
-        fillUser : {'name':'','username': '','role': '','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'','designation':'','county':'','sub_county':'','mfl_code':'','facility':'',},
+        newUser : {'first_name':'','middle_name':'','last_name':'','name':'','username': '','role': '','gender':'', 'phone':'', 'email':'', 'address':''},
+        fillUser : {'first_name':'','middle_name':'','last_name':'','name':'','username': '','role': '','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'','designation':'','county':'','sub_county':'','mfl_code':'','facility':'',},
         transferUser : {'facility_id':'','program_id':'', 'id':''},
         loading: false,
         error: false,
         query: '',
         formTransErrors:{},
         uploadify: {id: '', excel: ''},
-        someUser : {'name':'','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'', 'county':'', 'sub_county':'', 'mfl':'', 'facility':'', 'program':'', 'designation':''},
+        someUser : {'first_name':'','middle_name':'','last_name':'','name':'','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'', 'county':'', 'sub_county':'', 'mfl':'', 'facility':'', 'program':'', 'designation':''},
         jimbo: [],
         sexes: [],
         uploadify: {excel: ''},
@@ -99,7 +99,7 @@ new Vue({
                 var input = this.newUser;
                 this.$http.post('/vueparticipants',input).then((response) => {
                     this.changePage(this.pagination.current_page);
-                    this.newUser = {'name':'', 'username': '','gender':'', 'phone':'', 'email':'', 'address':''};
+                    this.newUser = {'first_name':'','middle_name':'','last_name':'','name':'', 'username': '','gender':'', 'phone':'', 'email':'', 'address':''};
                     $("#create-user").modal('hide');
                     toastr.success('User Created Successfully.', 'Success Alert', {timeOut: 5000});
                 }, (response) => {
@@ -127,6 +127,9 @@ new Vue({
 
         editUser: function(user){
             this.fillUser.id = user.id;
+            this.fillUser.first_name = user.first_name;
+            this.fillUser.middle_name = user.middle_name;
+            this.fillUser.last_name = user.last_name;
             this.fillUser.name = user.name;
             this.fillUser.username = user.username;
             this.fillUser.gender = user.gender;
@@ -151,7 +154,7 @@ new Vue({
                 var input = this.fillUser;
                 this.$http.put('/vueparticipants/'+id,input).then((response) => {
                     this.changePage(this.pagination.current_page);
-                    this.fillUser = {'name':'','username': '','role': '','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'','designation':'','county':'','sub_county':'','mfl_code':'','facility':'',};
+                    this.fillUser = {'first_name':'','middle_name':'','last_name':'','name':'','username': '','role': '','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'','designation':'','county':'','sub_county':'','mfl_code':'','facility':'',};
                     $("#edit-user").modal('hide');
                     toastr.success('User Updated Successfully.', 'Success Alert', {timeOut: 5000});
                 }, (response) => {
@@ -376,6 +379,9 @@ new Vue({
 
         openUser: function(user){
             this.someUser.id = user.id;
+            this.someUser.first_name = user.first_name;
+            this.someUser.middle_name = user.middle_name;
+            this.someUser.last_name = user.last_name;
             this.someUser.name = user.name;
             this.someUser.sex = user.gndr;
             this.someUser.phone = user.phone;
@@ -395,7 +401,7 @@ new Vue({
             var input = this.someUser;
             this.$http.put('/approve/'+id, input, 'confirm').then((response) => {
                 this.changePage(this.pagination.current_page);
-                this.someUser = {'name':'','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'', 'county':'', 'sub_county':'', 'mfl':'', 'facility':'', 'program':'', 'designation':''},
+                this.someUser = {'first_name':'','middle_name':'','last_name':'','name':'','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'', 'county':'', 'sub_county':'', 'mfl':'', 'facility':'', 'program':'', 'designation':''},
                 $("#approve-user").modal('hide');
                 toastr.success('User Approved Successfully.', 'Success Alert', {timeOut: 5000});
             }, (response) => {
@@ -430,7 +436,7 @@ new Vue({
 
                         this.$http.put('/denyUserVerification/'+id, input).then((response) => {
                             this.changePage(this.pagination.current_page);
-                            this.someUser = {'name':'','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'', 'county':'', 'sub_county':'', 'mfl':'', 'facility':'', 'program':'', 'designation':''},
+                            this.someUser = {'first_name':'','middle_name':'','last_name':'','name':'','gender':'', 'phone':'', 'email':'', 'address':'', 'id':'', 'county':'', 'sub_county':'', 'mfl':'', 'facility':'', 'program':'', 'designation':''},
                             $("#approve-user").modal('hide');
                             toastr.success('PT participation request successfully rejected.', 'Success Alert', {timeOut: 5000});
                         });

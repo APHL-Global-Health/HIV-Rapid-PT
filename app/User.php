@@ -58,7 +58,7 @@ EntrustUserTrait::restore insteadof SoftDeletes;
      *
      * @var array
      */
-    protected $fillable = ['name', 'email', 'password', 'username', 'address', 'phone', 'gender', 'designation'];
+    protected $fillable = ['first_name', 'middle_name', 'last_name', 'name', 'email', 'password', 'username', 'address', 'phone', 'gender', 'designation', 'implementing_partner_id'];
 
     /**
      * The attributes that should be mutated to dates.
@@ -222,6 +222,18 @@ EntrustUserTrait::restore insteadof SoftDeletes;
             return false;
     }
     /**
+     * Check if user is Participant
+     *
+     * @return User model
+     */
+    public function isPartner()
+    {
+        if($this->hasRole('Partner'))
+            return true;
+        else
+            return false;
+    }
+    /**
     * Return User ID given the name
     *
     */
@@ -327,6 +339,11 @@ EntrustUserTrait::restore insteadof SoftDeletes;
     public function enrol()
     {
         return $this->hasMany('App\Enrol');
+    }
+
+    public function implementingPartner()
+    {
+        return $this->belongsTo('App\ImplementingPartner');
     }
     public function getEmailVerificationUrlAttribute()
     {

@@ -16,12 +16,15 @@ use App\County;
 use App\SubCounty;
 use App\Facility;
 use App\Program;
+use App\Panel;
+use App\Material;
 
 use App\Libraries\AfricasTalkingGateway as Bulk;
 
 use Auth;
 use Jenssegers\Date\Date as Carbon;
 use DB;
+use PDF;
 
 class ResultController extends Controller
 {
@@ -217,7 +220,7 @@ class ResultController extends Controller
 
         $result = Pt::find($id);
         $result->verified_by = $user_id;
-        $result->panel_status = Pt::VERIFIED;
+        $result->panel_status = Pt::CHECKED;
         if($request->comment)
             $result->comment = $request->comment;
         $result->save();
@@ -275,16 +278,7 @@ class ResultController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
-        /*$this->validate($request, [
-            'round_id' => 'required',
-            'date_prepared' => 'required',
-            'date_shipped' => 'required',
-            'shipping_method' => 'required',
-            'shipper_id' => 'required',
-            'facility_id' => 'required',
-            'panels_shipped' => 'required',
-        ]);*/
+    {       
         $pt = Pt::find($id);
     
         //  Proceed to form-fields
@@ -385,11 +379,258 @@ class ResultController extends Controller
 
         return substr_replace($str, $replacement, $start, $end - $start);
     }
+     /**
+     * Verify results evaluted by a NON-Participant
+     *
+     * @param ID of the selected pt -  $id
+     */
+    public function evaluated_results($id)
+    {
+        //get actual results
+        $pt = Pt::find($id);
+        $round_id = $pt->enrolment->round->id;
+        $pt_results = $pt->results;
+        $option = new Option;
+
+        foreach ($pt_results as $rss) {
+            //test kit 1 results
+            if($rss->field_id == Field::idByUID('PT Panel 1 Test 1 Results'))
+                $pt_panel_1_kit1_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 2 Test 1 Results'))
+                $pt_panel_2_kit1_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 3 Test 1 Results'))
+                $pt_panel_3_kit1_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 4 Test 1 Results'))
+                $pt_panel_4_kit1_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 5 Test 1 Results'))
+                $pt_panel_5_kit1_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 6 Test 1 Results'))
+                $pt_panel_6_kit1_results = $option::nameByID($rss->response);
+
+            //test kit 2 results
+            if($rss->field_id == Field::idByUID('PT Panel 1 Test 2 Results'))
+                $pt_panel_1_kit2_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 2 Test 2 Results'))
+                $pt_panel_2_kit2_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 3 Test 2 Results'))
+                $pt_panel_3_kit2_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 4 Test 2 Results'))
+                $pt_panel_4_kit2_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 5 Test 2 Results'))
+                $pt_panel_5_kit2_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 6 Test 2 Results'))
+                $pt_panel_6_kit2_results = $option::nameByID($rss->response);
+           
+            //final results
+            if($rss->field_id == Field::idByUID('PT Panel 1 Final Results'))
+                $pt_panel_1_final_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 2 Final Results'))
+                $pt_panel_2_final_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 3 Final Results'))
+                $pt_panel_3_final_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 4 Final Results'))
+                $pt_panel_4_final_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 5 Final Results'))
+                $pt_panel_5_final_results = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('PT Panel 6 Final Results'))
+                $pt_panel_6_final_results = $option::nameByID($rss->response);
+           
+            // //test kit 1 results
+            if($rss->field_id == Field::idByUID('Test 1 Kit Name'))
+                $determine = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('Test 1 Lot No.'))
+                $determine_lot_no = $rss->response;
+            if($rss->field_id == Field::idByUID('Test 1 Expiry Date'))
+                $determine_expiry_date = $rss->response;
+
+            // //test kit 2 results
+            if($rss->field_id == Field::idByUID('Test 2 Kit Name'))
+                $firstresponse = $option::nameByID($rss->response);
+            if($rss->field_id == Field::idByUID('Test 2 Lot No.'))
+                $firstresponse_lot_no = $rss->response;
+            if($rss->field_id == Field::idByUID('Test 2 Expiry Date'))
+                $firstresponse_expiry_date = $rss->response;  
+        }
+        $actual_results = array( 
+                                );
+
+        //get expected results
+        $round = Round::find($round_id);
+        $user = $pt->enrolment->user;
+        $lot = $user->lot($round_id);
+        $expected_results = $lot->panels()->get();
+        $material_id = $expected_results->first()->material_id;
+        $material = Material::find($material_id); 
+
+        foreach ($expected_results as $ex_rslts) {
+
+            if($ex_rslts->panel == 1)
+                $expected_result_1 = $ex_rslts->result($ex_rslts->result);
+                $sample_1 = "PT-".$round->name."-S1";
+            if($ex_rslts->panel == 2)
+                $expected_result_2 = $ex_rslts->result($ex_rslts->result);
+                $sample_2 = "PT-".$round->name."-S2";
+            if($ex_rslts->panel == 3)
+                $expected_result_3 = $ex_rslts->result($ex_rslts->result);
+                $sample_3 = "PT-".$round->name."-S3";
+            if($ex_rslts->panel == 4)
+                $expected_result_4 = $ex_rslts->result($ex_rslts->result);
+                $sample_4 = "PT-".$round->name."-S4";
+            if($ex_rslts->panel == 5)
+                $expected_result_5 = $ex_rslts->result($ex_rslts->result);
+                $sample_5 = "PT-".$round->name."-S5";
+            if($ex_rslts->panel == 6)
+                $expected_result_6 = $ex_rslts->result($ex_rslts->result);
+                $sample_6 = "PT-".$round->name."-S6";
+        }
+
+        //get participant details
+        $user_name = $user->name;
+        $tester_id = $user->username;
+        $roleUser = $user->ru();
+        $facility = Facility::find($roleUser->tier);
+        $designation = $user->designation($roleUser->designation);
+        $program = Program::find($roleUser->program_id)->name;
+        $county = strtoupper($facility->subCounty->county->name);
+        $sub_county = $facility->subCounty->name;
+        $mfl = $facility->code;
+        $facility = $facility->name;
+        
+        //combine expected and actual result into one array
+        $all_results = array();
+        $round_name = $round->name;
+        $feedback = $pt->outcome($pt->feedback);
+        $panel_status = $pt->panel_status;
+
+        if($pt->feedback == Pt::UNSATISFACTORY)
+            $remark = $pt->unsatisfactory(); 
+        else
+            $remark = 'None';
+        
+        // dd($remark);
+         $all_results = array( 
+                    //user details
+                    'round_name'=> $round_name, 
+                    'feedback' => $feedback, 
+                    'remark' => $remark, 
+                    'panel_status' => $panel_status, 
+                    'pt_id' => $pt->id,
+                    'pt_approved_comment' => $pt->approved_comment,
+                    'user_name' => $user_name,
+                    'tester_id' => $tester_id,
+                    'designation' => $designation,
+                    'program' => $program,
+                    'county' => $county,
+                    'sub_county' => $sub_county,
+                    'facility' => $facility,
+                    'mfl' => $mfl,
+
+                    //material details
+                    'date_collected' =>$material->date_collected,
+                    'date_prepared' =>$material->date_prepared,
+                    'expiry_date' =>$material->expiry_date,
+
+                    //panel info
+                    'determine' =>$determine,
+                    'determine_lot_no' =>$determine_lot_no,
+                    'determine_expiry_date' =>$determine_expiry_date,
+                    'firstresponse' =>$firstresponse,
+                    'firstresponse_lot_no' =>$firstresponse_lot_no,
+                    'firstresponse_expiry_date' =>$firstresponse_expiry_date,
+
+                    //results
+                    //test 1 results
+                    "pt_panel_1_kit1_results"=>$pt_panel_1_kit1_results, 
+                    "pt_panel_2_kit1_results"=>$pt_panel_2_kit1_results,
+                    "pt_panel_3_kit1_results"=>$pt_panel_3_kit1_results,
+                    "pt_panel_4_kit1_results"=>$pt_panel_4_kit1_results,
+                    "pt_panel_5_kit1_results"=>$pt_panel_5_kit1_results,
+                    "pt_panel_6_kit1_results"=>$pt_panel_6_kit1_results,
+
+                    //test 2 results
+                    "pt_panel_1_kit2_results"=>$pt_panel_1_kit2_results, 
+                    "pt_panel_2_kit2_results"=>$pt_panel_2_kit2_results,
+                    "pt_panel_3_kit2_results"=>$pt_panel_3_kit2_results,
+                    "pt_panel_4_kit2_results"=>$pt_panel_4_kit2_results,
+                    "pt_panel_5_kit2_results"=>$pt_panel_5_kit2_results,
+                    "pt_panel_6_kit2_results"=>$pt_panel_6_kit2_results,
+
+                    //final tested results
+                    "pt_panel_1_final_results"=>$pt_panel_1_final_results, 
+                    "pt_panel_2_final_results"=>$pt_panel_2_final_results,
+                    "pt_panel_3_final_results"=>$pt_panel_3_final_results,
+                    "pt_panel_4_final_results"=>$pt_panel_4_final_results,
+                    "pt_panel_5_final_results"=>$pt_panel_5_final_results,
+                    "pt_panel_6_final_results"=>$pt_panel_6_final_results,
+
+                    //expected results
+                    "expected_result_1"=>$expected_result_1, 
+                    "expected_result_2"=>$expected_result_2,
+                    "expected_result_3"=>$expected_result_3,
+                    "expected_result_4"=>$expected_result_4,
+                    "expected_result_5"=>$expected_result_5,
+                    "expected_result_6"=>$expected_result_6,
+                    
+                    //sample name
+                    "sample_1"=>$sample_1, 
+                    "sample_2"=>$sample_2,
+                    "sample_3"=>$sample_3,
+                    "sample_4"=>$sample_4,
+                    "sample_5"=>$sample_5,
+                    "sample_6"=>$sample_6
+                );
+
+        // return response()->json($all_results); 
+        return $all_results;       
+    }
+/**
+     * Verify results evaluted by a NON-Participant
+     *
+     * @param ID of the selected pt -  $id
+     */
+    public function show_evaluated_results($id)
+    {
+        $data = $this->evaluated_results($id);
+        return response()->json($data);
+
+    }    
+
+     /**
+     * Save the verification of evaluated results
+     *
+     * @param ID of the selected pt -  $id
+     */
+    public function verify_evaluated_results(Request $request, $id )
+    {
+        $pt_id = $request->pt_id;
+        $user_id = Auth::user()->id; 
+
+        $result = Pt::find($id);
+        $result->panel_status = Pt::VERIFIED;
+        if ($request) {
+            $result->approved_comment = $request->comment;            
+     
+            if($request->comment)
+                $result->approved_by = $user_id;
+        }
+        $result->save();
+        
+        return response()->json($result);
+    }
+        
     /**
      * Fetch feedback for the given id
      *
      * @param ID of the selected pt -  $id
      */
+
+    public function print_result($id){
+      $data = $this->evaluated_results($id);
+
+      $pdf = PDF::loadView('result/print', compact('data'));
+      return $pdf->download('invoice.pdf');
+
+    }
     public function feedback($id)
     {
         $pt = Pt::find($id);

@@ -17,9 +17,9 @@ class County extends Model
   	*/
   	protected $table = 'counties';
     /**
-  	* Relationship with sub-countis.
-  	*
-  	*/
+    * Relationship with sub-countis.
+    *
+    */
     public function subCounties()
     {
        return $this->hasMany('App\SubCounty');
@@ -33,6 +33,14 @@ class County extends Model
         $subs = $this->subCounties()->pluck('id')->toArray();
         return Facility::whereIn('sub_county_id', $subs);
     }    
+    /**
+    * Relationship with implementing partners.
+    *
+    */
+    public function implementingPartners()
+    {
+       return $this->belongsToMany('App\ImplementingPartner');
+    }
     /**
     * Get users for a county
     *

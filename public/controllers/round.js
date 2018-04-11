@@ -25,8 +25,11 @@ new Vue({
         fillRound : {'name':'','description':'','start_date':'','duration':'','end_date':'','id':''},
         loading: false,
         error: false,
+        checked:false,
         query: '',
         participants: [],
+        testerparticipants:[],
+        srchloadedprt:'',
         srchParticipant: '',
         enrollments: [],
         esrch: '',
@@ -42,6 +45,36 @@ new Vue({
         isActived: function () {
             return this.pagination.current_page;
         },
+        /*isDeactivated: function(){
+            this.$http.get('/vuerounds?page=').then((response) => {
+                if(response.data.data)
+                {
+                    this.rounds = response.data.data.data;                    
+                    this.rounds.forEach(function(date){
+                        disabled =  false;
+                        console.log(date.end_date);
+
+                        return date.end_date;
+                        var today = new Date();
+                        var dd = today.getDate();
+                        var mm = today.getMonth()+1; 
+                        var yyyy = today.getFullYear();
+
+                       if(dd<10) {
+                              dd = '0'+dd
+                             } 
+
+                        if(mm<10) {
+                          mm = '0'+mm
+                            } 
+
+                           today = yyyy + '-' + mm + '-' + dd;
+                           console.log(today);
+                    });
+                }
+                
+            });
+        },*/
         pagesNumber: function () {
             if (!this.pagination.to) {
                 return [];
@@ -117,6 +150,12 @@ new Vue({
             this.$http.delete('/vuerounds/'+round.id).then((response) => {
                 this.changePage(this.pagination.current_page);
                 toastr.success('Round Deleted Successfully.', 'Success Alert', {timeOut: 5000});
+            });
+        },
+        deleteParticipant: function(participant){
+            this.$http.delete('/vueparticipants/'+ participant).then((response) => {
+                this.changePage(this.pagination.current_page);
+                toastr.success('Participant(s) Deleted Successfully.', 'Success Alert', {timeOut: 5000});
             });
         },
 
@@ -215,6 +254,36 @@ new Vue({
                 this.srchParticipant = '';
             });
         },
+        srchPrtEnrol: function() {
+            // Clear the error message.
+            this.error = '';
+            // Empty the testerparticipants array so we can fill it with the new participants.
+            this.testerparticipants = [];
+            // Set the loading property to true, this will display the "Searching..." button.
+            this.loading = true;
+
+            // Making a get request to our API and passing the srchloadedprt query to it.
+            this.$http.get('/api/search_participant?q=' + this.srchloadedprt).then((response) => {
+                // If there was an error set the error message, if not fill the participant array.
+                if(response.data.error)
+                {
+                    this.error = response.data.error;
+                    toastr.error(this.error, 'Search Notification', {timeOut: 5000});
+                }
+                else
+                {
+                    this.testerparticipants = response.data.data.data;
+                    this.pagination = response.data.pagination;
+                    toastr.success('The search results below were obtained.', 'Search Notification', {timeOut: 5000});
+                }
+                // The request is finished, change the loading to false again.
+                this.loading = false;
+                // Clear the srchloadedprt query.
+                this.srchloadedprt = '';
+                // The participants who are checked won't be enrolled;
+                this.checked = true;
+            });
+        },
 
         loadParticipants: function(roundID) {
             this.$http.get('/parts').then((response) => {
@@ -226,12 +295,27 @@ new Vue({
             });
         },
 
+        Participants: function(roundID) {
+            
+            this.$http.get('/loadparticipants' ).then((response) => {
+                this.testerparticipants = response.data.data.data;
+                console.log(this.testerparticipants); 
+                this.pagination = response.data.pagination;
+                this.roundId = roundID;
+                this.checked = true;
+            }, (response) => {
+                // 
+            });
+        },
+
         enrolParticipants: function(){
-		    let myForm = document.getElementById('partFrm');
+		    let myForm = document.getElementById('partFrms');
             let formData = new FormData(myForm);
+            console.log(formData);
             this.$http.post('/enrol', formData).then((response) => {
                 this.changePage(this.pagination.current_page);
-                $("#enrol-participants").modal('hide');
+                //$("#enrol-participants").modal('hide');
+                $("#load-participants").modal('hide');
                 toastr.success('Participant(s) Enrolled Successfully.', 'Success Alert', {timeOut: 5000});
             }, (response) => {
                 this.formErrors = response.data;

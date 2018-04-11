@@ -74,9 +74,10 @@
             @endpermission
             @permission('enrol-participants')
                 <button v-if="!round.deleted_at" class="btn btn-sm btn-wet-asphalt" id="enrol" data-toggle="modal" data-target="#enrol-participants" style="display:none;" :data-fk="round.id" @click.prevent="loadParticipants(1)"><i class="fa fa-send"></i> Enrol</button>                
-                <a v-if="!round.deleted_at" class="btn btn-sm btn-wet-asphalt" :href="'/download/' + round.id" id="enrolled" ><i class="fa fa-level-down"></i> Summary Workbook</a>
-                <button v-if="!round.deleted_at" class="btn btn-sm btn-nephritis" @click.prevent="uploadSheet(round)"><i class="fa fa-level-up"></i> Upload Worksheet</button>
-                <button v-if="!round.deleted_at" class="btn btn-sm btn-new-participants" id="enrol" data-toggle="modal" data-target="#enrol-participants" :data-fk="round.id"   @click.prevent="loadParticipants(round.id)"><i class="fa fa-book"></i> New Participants</button>                
+                <a v-if="!round.deleted_at" class="btn btn-sm btn-wet-asphalt" :href="'/download/' + round.id" id="enrolled" ><i class="fa fa-level-down"></i>Participants List</a>
+                <button v-if="!round.deleted_at" class="btn wisteria" data-toggle="modal" data-target="#load-participants" @click.prevent="Participants(round.id)" ><i class="fa fa-list"></i> Enrol Participants</button>
+                <button v-if="!round.deleted_at" :data-fk="round.id" class="btn btn-sm btn-nephritis" @click.prevent="uploadSheet(round)"><i class="fa fa-level-up"></i> Upload Worksheet</button>
+               <!-- <button v-if="!round.deleted_at" class="btn btn-sm btn-new-participants" id="enrol" data-toggle="modal" data-target="#enrol-participants" :data-fk="round.id"   @click.prevent="loadParticipants(round.id)"><i class="fa fa-book"></i> New Participants</button>               -->
             @endpermission
             </td>
         </tr>
@@ -399,6 +400,89 @@
                                 <button type="button" class="btn btn-sm btn-silver" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"><i class="fa fa-times-circle"></i> {!! trans('messages.cancel') !!}</span></button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Load Participants -->
+    <div id="load-participants" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myModalLabel">Participants</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4" style="padding-bottom:10px;">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" placeholder="Search for..." v-model="srchloadedprt">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-secondary" type="button" @click="srchPrtEnrol()" v-if="!loading"><i class="fa fa-search"></i></button>
+                                    <button class="btn btn-secondary" type="button" disabled="disabled" v-if="loading">Searching...</button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <form method="POST" enctype="multipart/form-data" v-on:submit.prevent="enrolParticipants" id="partFrms">
+                            <div class="col-md-12">
+                                <input type="hidden" class="form-control" name="round_id" id="round-id" v-bind:value="roundId"/>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th>Participant</th>
+                                        <th>UID</th>
+                                        <th>Facility</th>
+                                        <th>Phone</th>
+                                        <th>Program</th>
+                                        <th>Remove</th>
+                                    </tr>
+                                    <tr v-for="participant in testerparticipants">
+                                        <td>                                        
+                                        @{{ participant.name }}</td>
+                                        <td>@{{ participant.uid }}</td>
+                                        <td>@{{ participant.fac }}</td>
+                                        <td>@{{participant.phone}}</td>
+                                        <td>@{{ participant.prog }}</td>
+                                        <td>
+                                         <input type="checkbox" checked='false'  :value="participant.id" name="usrs[]" >               
+                                         </td>
+                                                                                    
+                                    </tr>
+                                </table>
+                                <!-- Pagination -->
+                                <nav>
+                                    <ul class="pagination">
+                                        <li v-if="pagination.current_page > 1" class="page-item">
+                                            <a class="page-link" href="#" aria-label="Previous"
+                                                @click.prevent="changePage(pagination.current_page - 1)">
+                                                <span aria-hidden="true">«</span>
+                                            </a>
+                                        </li>
+                                        <li v-for="page in pagesNumber" class="page-item"
+                                            v-bind:class="[ page == isActived ? 'active' : '']">
+                                            <a class="page-link" href="#"
+                                                @click.prevent="changePage(page)">@{{ page }}</a>
+                                        </li>
+                                        <li v-if="pagination.current_page < pagination.last_page" class="page-item">
+                                            <a class="page-link" href="#" aria-label="Next"
+                                                @click.prevent="changePage(pagination.current_page + 1)">
+                                                <span aria-hidden="true">»</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+
+                                <div class="form-group row col-sm-offset-4 col-sm-8">
+                                    <button type="submit" class="btn btn-sm btn-success"><i class='fa fa-plus-circle'></i> Enrol</button>
+                                    <button type="button" class="btn btn-sm btn-silver" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"><i class="fa fa-times-circle"></i> {!! trans('messages.cancel') !!}</span></button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

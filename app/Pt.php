@@ -14,10 +14,10 @@ class Pt extends Model
   	* Status of result
   	*
   	*/
-  	const NOT_CHECKED = 0;
-	  const CHECKED = 1;
-  	const NOT_VERIFIED = 2;
-  	const VERIFIED = 3;
+  	const NOT_CHECKED = 0; // results just added by participant but not checked and submitted for evaluation
+	  const CHECKED = 1; // once the participant has checked that the results are as they should be (verified)
+  	const EVALUATED = 2; // the results have been evaluated by the system
+  	const VERIFIED = 3; // the admin or County Coordinator verifies the results and can be printed
 	  /**
   	* Status of result
   	*

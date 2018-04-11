@@ -43,7 +43,7 @@
 </head>
 <body>    
     <div class="login-page" id="sign-in" style="padding-top:20px;">
-        <div class="card col-md-3" style="margin:auto; float:none">
+        <div class="card col-md-5" style="margin:auto; float:none">
             <div style="text-align:center;">
                 <br>
                 <img src="{{ '../'.Config::get('cms.logo') }}" height="75px;">
@@ -52,8 +52,8 @@
                 </h3>
             </div> 
             <div class="bs-callout bs-callout-info text-left">
-                <h6 class="md-18">Getting Started<span><a class="pull-right" style="color:#18bc9c;" href="http://nphls.or.ke/helpdesk/index.php?a=add"><strong>PT Help Desk</strong></a></span></h6>
-                <small>Login with your Username or PT Enrollment ID. Click on the Sign-up button to register as a new participant. If you have forgotten your password, you can reset it by clicking Lost password.</small>
+                <h6 class="md-18">Getting Started</h6>
+                <small>Login with your Email Address or PT Enrollment ID.</small>
             </div>
             <form class="mt form-signin" id="loginForm" Irole="form" method="POST" action="{{ route('login') }}">
                 <!-- CSRF Token -->
@@ -76,8 +76,8 @@
                     </div>
                 @endif     
                 <div class="form-group">
-                    <label :class="{'help is-danger': errors.has('username') }" for="username/TesterID"><h6>Username or PT Enrollment ID</h6></label>
-                    <input type="text" v-validate="'required'" class="form-control" :class="{'input': true, 'is-danger': errors.has('username') }"  name="username" placeholder="eg. myusername or 11695" data-toggle="tooltip" title="Enter Username or PT Enrollment ID" data-placement="top" data-trigger="hover" autofocus="">
+                    <label :class="{'help is-danger': errors.has('username') }" for="username/TesterID"><h6>Email / PT Enrollment ID</h6></label>
+                    <input type="text" v-validate="'required'" class="form-control" :class="{'input': true, 'is-danger': errors.has('username') }"  name="username" placeholder="eg. me@mymail.com or 11695" data-toggle="tooltip" title="Enter Username or PT Enrollment ID" data-placement="top" data-trigger="hover" autofocus="">
                     <span v-show="errors.has('username')" class="help is-danger">@{{ errors.first('username') }}</span>
                 </div>
                 <div class="form-group">
@@ -85,22 +85,30 @@
                     <input type="password" v-validate="'required'" class="form-control" :class="{'input': true, 'is-danger': errors.has('password') }" name="password" placeholder="eg.qwerty" data-toggle="tooltip" data-placement="top">
                     <span v-show="errors.has('password')" class="help is-danger">@{{ errors.first('password') }}</span>
                 </div>
+                <div class="form-group">
+                    <button class="btn btn-primary btn-block" style="color:#fff;background-color:#2c3e50;border-color:#2c3e50" type="submit" name="signin" data-toggle="tooltip" data-placement="top" data-trigger="hover" title="Click to LogIn"  >LOG IN</button>
+                </div>
                 <div class="form-group form-check">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label class="form-check-label">
                             <input class="form-check-input" type="checkbox"> Remember me
                         </label>
                     </div>
-                    <div class="col-md-6">
-                        <a class="pull-right" style="color:#18bc9c;" href="{{url('password/reset')}}" data-toggle="tooltip" data-placement="top" data-trigger="hover" title="Click and enter Tester ID to get reset password link in your email"><strong>Lost password?</strong></a>
-                    </div>
+		</div>
+		<div class="form-group">
+		    If you have forgotten your password, you can reset it by clicking the Lost Password link below.<br />
+                    <a style="color:#18bc9c;" href="{{url('password/reset')}}" data-toggle="tooltip" data-placement="top" data-trigger="hover"><strong>Lost password?</strong></a>
+			<br />
                 </div>
                 <div class="form-group">
-                    <button class="btn btn-primary btn-block" style="color:#fff;background-color:#2c3e50;border-color:#2c3e50" type="submit" name="signin" data-toggle="tooltip" data-placement="top" data-trigger="hover" title="Click to LogIn"  >LOG IN</button>      
-                </div>  
-                <div class="form-group">
-                    <a class="btn btn-nephritis btn-block" onclick="confirmRegistration()" data-toggle="tooltip" data-placement="top" data-trigger="hover" title="Click to Register as a new participant"><strong>Sign up </strong></a>
-                </div>                     
+                    <a class="btn btn-nephritis btn-block" onclick="confirmRegistration()" data-toggle="tooltip" data-placement="top" data-trigger="hover" title="Click to Register as a new participant"><strong>Register</strong></a>
+                </div>
+                <div>
+                    Click on the Register button to register as a new participant.
+                </div>
+		<div class="form-group">
+			<center><span><a style="color:#18bc9c;" href="http://nphls.or.ke/helpdesk/index.php?a=add"><strong>PT Help Desk</strong></a></span></center>
+		</div>
             </form>
         </div>
     </div>    
@@ -129,7 +137,7 @@
     function confirmRegistration()
     {
         swal({
-            title: "Have you participated in PT before?",
+            title:"Have you been registered in the system before?",
             type: "warning",
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",

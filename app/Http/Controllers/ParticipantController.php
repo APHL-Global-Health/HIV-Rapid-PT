@@ -144,11 +144,11 @@ class ParticipantController extends Controller
     {
         //dd($request);
         $this->validate($request, [
-            'name' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'gender' => 'required',
             'phone' => 'required',
             'email' => 'required',
-            'address' => 'required',
             'username' => 'required'
         ]);
         $request->merge(['password' => Hash::make(User::DEFAULT_PASSWORD)]);
@@ -195,10 +195,11 @@ class ParticipantController extends Controller
     {
         //dd($request->all());
         $user = User::find($id);
-        $user->name = $request->name;
+        $user->first_name = $request->first_name;
+        $user->middle_name = $request->middle_name;
+        $user->last_name = $request->last_name;
         $user->phone = $request->phone;
         $user->email = $request->email;
-        $user->address = $request->address;
         try{
             $user->save();
             $role = $request->role;
@@ -249,7 +250,8 @@ class ParticipantController extends Controller
     {
         $user = User::withTrashed()->where('id', $id)->restore();
         $user = User::find($id);
-        $message    = "Dear ".$user->name.", NPHL has enabled your account.";
+        $message    = "Dear ".$user->name.", NPHL has enabled your account. Once
+enrolled, you’ll receive a tester ID";
         try 
         {
             $smsHandler = new SmsHandler();
@@ -474,7 +476,6 @@ class ParticipantController extends Controller
             $user->gender = $request->gender;
             $user->email = $request->email;
             $user->phone = $request->phone;
-            $user->address = $request->address;
             $user->designation = $request->designation;
             $user->username = $request->name;
             $user->deleted_at = $now;
@@ -865,12 +866,13 @@ class ParticipantController extends Controller
         $max = $user->id; //change this to pick sequential unique ids
         $user->uid = $max;
         $user->username = $max;
+        $user->status = '';
         $user->save();
 
         //send mail
         $token = app('auth.password.broker')->createToken($user);
         $user->token = $token;
-        $user->notify(new WelcomeNote($user));
+         $user->notify(new WelcomeNote($user));
         
         //  Bulk-sms settings
         $api = DB::table('bulk_sms_settings')->first();
@@ -883,13 +885,13 @@ class ParticipantController extends Controller
         // Create a new instance of our awesome gateway class
         $gateway    = new Bulk($username, $apikey);
        
-        try 
-        {
-            $smsHandler = new SmsHandler();
+         try 
+         {
+             $smsHandler = new SmsHandler();
             $smsHandler->sendMessage($user->phone, $message);
-        }
-        catch ( AfricasTalkingGatewayException $e )
-        {
+         }
+         catch ( AfricasTalkingGatewayException $e )
+         {
             echo "Encountered an error while sending: ".$e->getMessage();
         }
     }

@@ -17,6 +17,7 @@ new Vue({
         subs: [],
         programs:[],
         facilities: [],
+        implementing_partners: [],
         pagination: {
             total: 0, 
             per_page: 2,
@@ -27,8 +28,8 @@ new Vue({
         offset: 4,
         formErrors:{},
         formErrorsUpdate:{},
-        newUser : {'name':'','username': '','role': '','gender':'', 'phone':'', 'email':'', 'address':''},
-        fillUser : {'name':'','username': '','role': '','gender':'', 'phone':'', 'email':'', 'address':'', 'id':''},
+        newUser : {'first_name':'','middle_name':'','last_name':'','name':'','username': '','role': '','gender':'', 'phone':'', 'email':'', 'address':'', 'implementing_partner_id':''},
+        fillUser : {'first_name':'','middle_name':'','last_name':'','name':'','username': '','role': '','gender':'', 'phone':'', 'email':'', 'address':'', 'implementing_partner_id':'', 'id':''},
         transferUser : {'facility_id':'','program_id':'', 'id':''},
         loading: false,
         error: false,
@@ -73,6 +74,7 @@ new Vue({
         this.loadCounties();
         this.loadRoles();
         this.loadSexes();
+        this.loadImplementingPartners();
     },
 
     methods : {
@@ -90,7 +92,7 @@ new Vue({
                 this.loading = true;
                 this.$http.post('/vueusers',input).then((response) => {
                     this.changePage(this.pagination.current_page);
-                    this.newUser = {'name':'', 'username': '','gender':'', 'phone':'', 'email':'', 'address':''};
+                    this.newUser = {'name':'', 'username': '','gender':'', 'phone':'', 'email':'', 'address':'', 'implementing_partner_id':''};
                     $("#create-user").modal('hide');
                     if(response.data.errormessage.length > 0){
                         toastr.error("<ul><li>" + response.data.errormessage.join("</li><li>") + "</li></ul>", 'Error Alert', {closeButton: true, positionClass: "toast-top-full-width"});
@@ -132,17 +134,20 @@ new Vue({
 
         editUser: function(user){
             this.fillUser.id = user.id;
+            this.fillUser.first_name = user.first_name;
+            this.fillUser.middle_name = user.middle_name;
+            this.fillUser.last_name = user.last_name;
             this.fillUser.name = user.name;
             this.fillUser.username = user.username;
             this.fillUser.gender = user.gender;
             this.fillUser.phone = user.phone;
             this.fillUser.email = user.email;
-            this.fillUser.address = user.address;
             this.fillUser.rl = user.rl;
             this.fillUser.role = user.role;
             this.fillUser.program = user.program;
             this.fillUser.uid = user.uid;
             this.fillUser.address = user.address;
+            this.fillUser.implementing_partner_id = user.implementing_partner_id;
             $("#edit-user").modal('show');
         },
 
@@ -151,7 +156,8 @@ new Vue({
                 var input = this.fillUser;
                 this.loading = true;
                 this.$http.put('/vueusers/'+id,input).then((response) => {
-                    this.fillUser = {'name':'','username': '','gender':'', 'phone':'', 'email':'', 'address':''};
+                    //this.changePage(this.pagination.current_page); - @TODO
+                    this.fillUser = {'first_name':'','middle_name':'','last_name':'','name':'','username': '','gender':'', 'phone':'', 'email':'', 'address':''};
                     $("#edit-user").modal('hide');
                     if(response.data.errormessage.length > 0){
                         toastr.error("<ul><li>" + response.data.errormessage.join("</li><li>") + "</li></ul>", 'Error Alert', {closeButton: true, positionClass: "toast-top-full-width"});
@@ -221,6 +227,14 @@ new Vue({
         loadSexes: function() {
             this.$http.get('/sex').then((response) => {
                 this.sexes = response.data;
+            }, (response) => {
+                // console.log(response);
+            });
+        },
+
+        loadImplementingPartners: function() {
+            this.$http.get('/vueimplementingpartners').then((response) => {
+                this.implementing_partners = response.data.data.data;
             }, (response) => {
                 // console.log(response);
             });

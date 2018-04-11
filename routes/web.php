@@ -15,6 +15,8 @@ Route::get('login', 'Auth\LoginController@getLogin');
 
 Auth::routes();
 
+Route::get('/password/code', 'Auth\ForgotPasswordController@codeVerify');
+
 Route::get('signup', function () {
     return view('auth.signup');
 });
@@ -32,6 +34,7 @@ Route::post('/token', 'UserController@phoneVerification');
 
 Route::get("/sex", array(
     "as"   => "sex.fetch",
+// "uses" => "UserController@counties"
     "uses" => "UserController@sex"
 ));
 
@@ -374,6 +377,22 @@ Route::group(['middleware' => 'auth'], function()
         "uses" => "ShipmentController@consignments"
     ));
 
+    //Show evaluted results
+    Route::get("/show_evaluated_results/{id}", array(
+        "as"   => "show_evaluated_results.fetch",
+        "uses" => "ResultController@show_evaluated_results"
+    ));
+     Route::any("/verify_evaluated_results/{id}", array(
+        "as"   => "verify_evaluated_results",
+        "uses" => "ResultController@verify_evaluated_results"
+    ));
+
+     //  Get feedback
+    Route::get("/print_result/{id}", array(
+        "as"   => "print_result.fetch",
+        "uses" => "ResultController@print_result"
+    ));
+
     //  Get feedback
     Route::get("/feedback/{id}", array(
         "as"   => "feedback.fetch",
@@ -417,6 +436,10 @@ Route::group(['middleware' => 'auth'], function()
         "as"   => "testers.download",
         "uses" => "RoundController@testerSummary"
     ));
+    Route::get("/loadparticipants/", array(
+        "as"   => "load.participants",
+        "uses" => "RoundController@loadparticipants"
+    ));
 
     Route::any("/approve/{id}", array(
         "as"   => "approve.participant",
@@ -434,6 +457,15 @@ Route::group(['middleware' => 'auth'], function()
     Route::get('participant', 'ParticipantController@manageParticipant');
     Route::resource('vueparticipants','ParticipantController');
     Route::any('vueparticipants/{id}/restore','ParticipantController@restore');
+    Route::any('vuepartner/{id}/restore','PartnerController@restore');
+
+    Route::get('agency', 'AgencyController@manageAgency');
+    Route::resource('vueagencies','AgencyController');
+    Route::any('vueagencies/{id}/restore','AgencyController@restore');
+
+    Route::get('implementingpartner', 'ImplementingPartnerController@manageImplementingPartner');
+    Route::resource('vueimplementingpartners','ImplementingPartnerController');
+    Route::any('vueimplementingpartners/{id}/restore','ImplementingPartnerController@restore');
 
     Route::get('api/search_role',['as'=>'role.search', 'uses'=>'RoleController@index']);
     Route::get('api/search_material',['as'=>'material.search', 'uses'=>'MaterialController@index']);

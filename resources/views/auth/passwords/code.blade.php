@@ -35,7 +35,7 @@
 					<div class="col-md-12 text-md-center">
 						<img src="{{ '../'.Config::get('cms.logo') }}" height="50px">
 						<h5 class="text-warning"><strong>{!! Config::get('cms.name') !!}</strong></h5>
-                        <h5 class="text-primary"><strong>Phone number Verification</strong></h5>
+                        <h5 class="text-primary"><strong>Password Reset Verification</strong></h5>
                         <h6 class="text-muted"><strong>Enter the verification token sent to your phone number from Nat-HIVPT</strong></h6>
 					</div>
 				</div>
@@ -72,13 +72,7 @@
                                 <button class="btn btn-midnight-blue btn-block" v-on:click.prevent="resendVerificationCode"><strong><i class="fa fa-refresh" ></i>Resend Code</strong></button>
                             </div>
                         </div>
-                        <div class="card card-outline-success text-center">
-                            <div class="card-block">
-                                <blockquote class="card-blockquote text-white">
-                                    <strong>We've sent a welcome email to your email address with a link to activate your account. If you cannot fine the mail, check the Junk/Spam folder!</strong>
-                                </blockquote>
-                            </div>
-                        </div>
+
                     </div>
 			</div>
             <div class="row" style="padding:20px">

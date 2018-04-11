@@ -31,6 +31,7 @@ new Vue({
         roundsDone: [],
         frmData: {},
         viewFormData:{},
+        evaluated_results:[],
         loading: false,
         error: false,
         query: '',
@@ -196,7 +197,38 @@ new Vue({
             });
         },
 
-        printFeedback: function(id){
+        // Verfiy the evaluated 
+        showEvaluatedResults: function(result){
+            //    Fetch the result using the id
+            let id = result.id;
+            this.$http.get('/show_evaluated_results/'+id).then((response) => {
+                this.evaluated_results = response.data;
+            });
+            $("#view-evaluted-result").modal('show');
+        },
+
+        //User reviews and saves the comments on the evaluated results
+        verifyEvaluatedResult: function(id){
+            let myForm = document.getElementById('verify_evaluated_test_results');
+            let formData = new FormData(myForm);
+            console.log(formData);
+            this.$http.post('/verify_evaluated_results/'+id, formData).then((response) => {
+                this.changePage(this.pagination.current_page);
+                $("#view-evaluted-result").modal('hide');
+                toastr.success('Result Verified Successfully.', 'Success Alert', {timeOut: 5000});
+            });
+        },
+
+        //A shortcut on quick verification on the satisfactory results
+        quickVerifyEvaluatedResult: function(id){
+            // let id = result.id;
+            this.$http.get('/verify_evaluated_results/'+id).then((response) => {
+                this.changePage(this.pagination.current_page);
+                toastr.success('Result Verified Successfully.', 'Success Alert', {timeOut: 5000});
+            });
+        },
+
+        printFeedback:function(id){
             let feedback = [];
             //  Fetch data using the given id
             this.$http.get('/feedback/'+id).then((response) => {
@@ -218,6 +250,8 @@ new Vue({
                 doc.writeText(0, 70, "P.O. BOX 20750 - 00202, NAIROBI", { align: 'center' });
                 doc.setFontSize(10);
                 doc.writeText(0, 80, "NATIONAL HIV SEROLOGY PROFICIENCY TESTING SCHEME", { align: 'center' });
+                doc.setFontSize(7);
+                doc.writeText(0, 80, "Final Report", { align: 'center' });
                 //  User details area
                 doc.setFontType("bold");
                 doc.writeText(22.5, 85, "Round: ");
@@ -249,6 +283,10 @@ new Vue({
                 doc.text(45, 122, feedback.verdict);
                 doc.setFontType("normal");
                 doc.writeText(22.5, 127, feedback.remark);
+
+                //results table
+
+
                 //  Footer
                 doc.writeText(22.5, 257, "Thank you for your participation.");
                 doc.writeText(22.5, 265, "NPHL HEAD:     Nancy Bowen");

@@ -27,6 +27,17 @@
 
         <!-- Toastr Styling -->
         <link href="{{ asset('css/toastr.min.css') }}" rel="stylesheet">
+
+        <style type="text/css">
+        /* CSS used here will be applied after bootstrap.css */
+            .picha {
+                background-color: white;
+            }
+
+	    .navigation .list-unstyled li a {
+    		color: #FFFFFF;
+    	    }
+        </style>
         <!-- Sweet Alert Styling-->
         <link rel="stylesheet" type="text/css" href="{{ asset('css/sweetalert.css') }}">
 
@@ -154,6 +165,19 @@
                             <!-- <li class="{!! Request::segment(2)==strtolower('broadcast')?strtolower(trans('messages.active')):'' !!}">
                                 <a href="{!! url('broadcast') !!}"><i class="fa fa-bookmark"></i> {!! trans('messages.broadcast') !!}</a>
                             </li> -->
+                        </ul>
+                    </li>
+                    @endpermission
+                    @permission('user-management')
+                    <li class="has-submenu{!! in_array(Request::segment(1), [strtolower('agency'), strtolower('implementingpartner'), strtolower('partner')])?' '.strtolower(trans('messages.active')):'' !!}">
+                        <a href="#"><i class="fa fa-users"></i> {!! 'Partners' !!}</a>
+                        <ul class="list-unstyled">
+                            <li class="{!! Request::segment(1)==strtolower('agency')?strtolower(trans('messages.active')):'' !!}">
+                                <a href="{!! url('agency') !!}"><i class="fa fa-bookmark"></i> {!! 'Agencies' !!}</a>
+                            </li>
+                            <li class="{!! Request::segment(1)==strtolower('implementingpartner')?strtolower(trans('messages.active')):'' !!}">
+                                <a href="{!! url('implementingpartner') !!}"><i class="fa fa-bookmark"></i> {!! 'Implementing Partners' !!}</a>
+                            </li>
                         </ul>
                     </li>
                     @endpermission
@@ -300,6 +324,10 @@
         <script src="{{ asset('controllers/user.js') }}"></script>
         @elseif(Request::segment(1)==strtolower('participant'))
         <script src="{{ asset('controllers/participant.js') }}"></script>
+        @elseif(Request::segment(1)==strtolower('implementingpartner'))
+        <script src="{{ asset('controllers/implementingpartner.js') }}"></script>
+        @elseif(Request::segment(1)==strtolower('agency'))
+        <script src="{{ asset('controllers/agency.js') }}"></script>
         @elseif(Request::segment(1)==strtolower('material'))
         <script src="{{ asset('controllers/material.js') }}"></script>
         @elseif(Request::segment(1)==strtolower('panel'))

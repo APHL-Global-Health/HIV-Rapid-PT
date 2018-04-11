@@ -15,6 +15,7 @@ use App\Program;
 use App\Round;
 use App\SmsHandler;
 use App\Designation;
+use App\ImplementingPartner;
 
 use DB;
 use Hash;
@@ -106,7 +107,8 @@ class UserController extends Controller
     {
         //dd($request);
         $this->validate($request, [
-            'name' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'gender' => 'required',
             'phone' => 'required',
             'email' => 'required',
@@ -154,11 +156,11 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $this->validate($request, [
-            'name' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'gender' => 'required',
             'phone' => 'required',
             'email' => 'required',
-            'address' => 'required',
             'username' => 'required'
         ]);
 

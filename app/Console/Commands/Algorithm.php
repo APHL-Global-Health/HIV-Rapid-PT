@@ -75,10 +75,10 @@ class Algorithm extends Command
         * 2. Get all unchecked results and execute the algorithm.
         *
         */
-        $counter = Pt::where('panel_status', Pt::NOT_CHECKED)->count();
+        $counter = Pt::where('panel_status', Pt::CHECKED)->count();
         if($counter > 0);
         {
-            $pts = Pt::where('panel_status', Pt::NOT_CHECKED)->get();
+            $pts = Pt::where('panel_status', Pt::CHECKED)->get();
             $this->runAlgorithm($pts);
         }
         $this->info('Scheduled:Cron Command Run successfully!');
@@ -507,16 +507,16 @@ class Algorithm extends Command
          $non_reactive = Option::idByTitle('Non Reactive');
          $not_done = Option::idByTitle('Not Done');
          $fr = Option::idByTitle('First Response');
-         $khb = Option::idByTitle('KHB');
-         $unigold = Option::idByTitle('Unigold');
+         $det = Option::idByTitle('Determine');
+         //$unigold = Option::idByTitle('Unigold');
          if(
              ($pt_panel_1_test_1_results == $non_reactive && $pt_panel_1_test_2_results == $not_done) || ($pt_panel_1_test_1_results == $reactive && ($pt_panel_1_test_2_results == $non_reactive || $pt_panel_1_test_2_results == $reactive)) || 
              ($pt_panel_2_test_1_results == $non_reactive && $pt_panel_2_test_2_results == $not_done) || ($pt_panel_2_test_1_results == $reactive && ($pt_panel_2_test_2_results == $non_reactive || $pt_panel_2_test_2_results == $reactive)) || 
              ($pt_panel_3_test_1_results == $non_reactive && $pt_panel_3_test_2_results == $not_done) || ($pt_panel_3_test_1_results == $reactive && ($pt_panel_3_test_2_results == $non_reactive || $pt_panel_3_test_2_results == $reactive)) || 
              ($pt_panel_4_test_1_results == $non_reactive && $pt_panel_4_test_2_results == $not_done) || ($pt_panel_4_test_1_results == $reactive && ($pt_panel_4_test_2_results == $non_reactive || $pt_panel_4_test_2_results == $reactive)) || 
              ($pt_panel_5_test_1_results == $non_reactive && $pt_panel_5_test_2_results == $not_done) || ($pt_panel_5_test_1_results == $reactive && ($pt_panel_5_test_2_results == $non_reactive || $pt_panel_5_test_2_results == $reactive)) || 
-             ($pt_panel_6_test_1_results == $non_reactive && $pt_panel_6_test_2_results == $not_done) || ($pt_panel_6_test_1_results == $reactive && ($pt_panel_6_test_2_results == $non_reactive || $pt_panel_6_test_2_results == $reactive)) || (($kit_1 == $khb || $kit_1 == "Determine") && ($kit_2 == $fr || $kit_2 == $unigold))
-        )
+             ($pt_panel_6_test_1_results == $non_reactive && $pt_panel_6_test_2_results == $not_done) || ($pt_panel_6_test_1_results == $reactive && ($pt_panel_6_test_2_results == $non_reactive || $pt_panel_6_test_2_results == $reactive)) || (($kit_1 == $det ) && ($kit_2 == $fr ))    
+            )
             $wrong_algorithm = 0;
          return $wrong_algorithm;
      }
@@ -702,7 +702,7 @@ class Algorithm extends Command
             $pt->invalid_results = $invalid_results;
             $pt->wrong_algorithm = $wrong_algorithm;
             $pt->feedback = $overall;
-            $pt->panel_status = Pt::CHECKED;
+            $pt->panel_status = Pt::EVALUATED;
             $pt->save();
         }
         return response()->json('Done.');
